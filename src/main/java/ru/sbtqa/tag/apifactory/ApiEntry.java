@@ -1,0 +1,495 @@
+package ru.sbtqa.tag.apifactory;
+
+import java.io.IOException;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.net.Proxy;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import org.apache.commons.io.IOUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import ru.sbtqa.tag.apifactory.annotation.AddBracket;
+import ru.sbtqa.tag.apifactory.annotation.ApiAction;
+import ru.sbtqa.tag.apifactory.annotation.ApiRequestHeader;
+import ru.sbtqa.tag.apifactory.annotation.ApiRequestParam;
+import ru.sbtqa.tag.apifactory.annotation.ApiValidationRule;
+import ru.sbtqa.tag.apifactory.annotation.DependentResponseParam;
+import ru.sbtqa.tag.apifactory.annotation.PutInStash;
+import ru.sbtqa.tag.apifactory.exception.ApiEntryInitializationException;
+import ru.sbtqa.tag.apifactory.exception.ApiException;
+import ru.sbtqa.tag.apifactory.repositories.Bullet;
+import ru.sbtqa.tag.apifactory.rest.Rest;
+import ru.sbtqa.tag.apifactory.soap.Soap;
+import ru.sbtqa.tag.datajack.Stash;
+import ru.sbtqa.tag.qautils.parsers.ParserItem;
+import ru.sbtqa.tag.qautils.properties.Props;
+import ru.sbtqa.tag.qautils.reflect.FieldUtils;
+
+/**
+ * Api object (ala Page object). Request to definite url with a set of
+ * parameters such as request method, parameters, response validation.
+ *
+ * @author Konstantin Maltsev <mkypers@gmail.com>
+ */
+public abstract class ApiEntry {
+
+    private static final Logger log = LoggerFactory.getLogger(ApiEntry.class);
+
+    private String requestPath = this.getClass().getAnnotation(ApiAction.class).path();
+    private final Map<String, String> headers = new HashMap<>();
+    private final Map<String, String> parameters = new HashMap<>();
+    private String body = null;
+    private String template = this.getClass().getAnnotation(ApiAction.class).template();
+
+    /**
+     * Set request parameter by title
+     *
+     * @param title a {@link java.lang.String} object.
+     * @param value a {@link java.lang.String} object.
+     * @throws ru.sbtqa.tag.apifactory.exception.ApiException
+     */
+    public void setParamValueByTitle(String title, String value) throws ApiException {
+        List<Field> fieldList = FieldUtils.getDeclaredFieldsWithInheritance(this.getClass());
+        for (Field field : fieldList) {
+            for (Annotation annotation : field.getAnnotations()) {
+                if (annotation instanceof ApiRequestParam
+                        && ((ApiRequestParam) annotation).title().equals(title)
+                        && value != null && !value.isEmpty()) {
+                    field.setAccessible(true);
+                    try {
+                        field.set(this, value);
+                    } catch (IllegalArgumentException | IllegalAccessException ex) {
+                        throw new ApiEntryInitializationException("Parameter with title '" + title + "' is not available", ex);
+                    }
+                    return;
+                }
+            }
+        }
+        throw new ApiEntryInitializationException("There is no '" + title + "' parameter in '" + this.getActionTitle() + "' api entry.");
+    }
+
+    /**
+     * Set request parameter by name
+     *
+     * @param name a {@link java.lang.String} object.
+     * @param value a {@link java.lang.String} object.
+     * @throws ru.sbtqa.tag.apifactory.exception.ApiException
+     */
+    private void setParamValueByName(String name, String value) throws ApiException {
+        List<Field> fieldList = FieldUtils.getDeclaredFieldsWithInheritance(this.getClass());
+        for (Field field : fieldList) {
+            if (name.equals(field.getName())) {
+                field.setAccessible(true);
+                try {
+                    field.set(this, value);
+                } catch (IllegalArgumentException | IllegalAccessException ex) {
+                    throw new ApiEntryInitializationException("Parameter with name '" + name + "' is not available", ex);
+                }
+                return;
+            }
+        }
+        throw new ApiEntryInitializationException("There is no parameter with name '" + name + "' in '" + this.getActionTitle() + "' api entry.");
+    }
+
+    /**
+     * Fill request parameters from data table
+     *
+     * @param params
+     */
+    public void fillParams(Map<String, String> params) {
+        params.forEach((k, v) -> {
+            try {
+                setParamValueByTitle(k, v);
+            } catch (Exception e) {
+                log.error("Failed to set params value by title", e);
+            }
+        });
+    }
+
+    /**
+     * Fill api request parameters, api request headers, request body and
+     * replace templates in requestPath
+     *
+     * @throws ru.sbtqa.tag.apifactory.exception.ApiException
+     */
+    public void fillParameters() throws ApiException {
+        applyParametersAnnotation();
+        setHeaders();
+        setBody();
+
+        //if api action path contains parameters like '%parameter' replace it with it value
+        parameters.entrySet().stream().forEach((parameter) -> {
+            requestPath = requestPath.replaceAll("%" + parameter.getKey(), (String) parameter.getValue());
+        });
+    }
+
+    /**
+     * Override it if you want to do pre-fire actions such as database run-up,
+     * test data prepare or something else
+     *
+     * @throws ru.sbtqa.tag.apifactory.exception.ApiException
+     */
+    public void prepare() throws ApiException {
+
+    }
+
+    /**
+     * Perform action with request method to url. Override it if you need use
+     * another rest or soap implementation
+     *
+     * @param url action target
+     * @return response
+     * @throws ru.sbtqa.tag.apifactory.exception.ApiException
+     */
+    public Object fire(String url) throws ApiException {
+        //Get request method of current api object
+        String requestMethod = this.getClass().getAnnotation(ApiAction.class).method().toLowerCase();
+        String templateName = this.getClass().getAnnotation(ApiAction.class).template();
+
+        Bullet response = null;
+        Class restImpl = ApiFactory.getApiFactory().getRest();
+        Class soapImpl = ApiFactory.getApiFactory().getSoap();
+        try {
+            Rest rest = (Rest) restImpl.newInstance();
+            Soap soap = (Soap) soapImpl.newInstance();
+
+            Object bd;
+            if (!"".equals(templateName)) {
+                bd = getBody();
+            } else {
+                bd = getParameters();
+            }
+
+            Map<String, String> hdrs = getHeaders();
+            switch (requestMethod) {
+                case "get":
+                    response = (Bullet) rest.get(url, hdrs);
+                    break;
+                case "post":
+                    response = (Bullet) rest.post(url, hdrs, bd);
+                    ApiFactory.getApiFactory().getRequestRepository().put(this.getClass(), bd);
+                    break;
+                case "put":
+                    response = (Bullet) rest.put(url, hdrs, bd);
+                    ApiFactory.getApiFactory().getRequestRepository().put(this.getClass(), bd);
+                    break;
+                case "patch":
+                    response = (Bullet) rest.patch(url, hdrs, bd);
+                    ApiFactory.getApiFactory().getRequestRepository().put(this.getClass(), bd);
+                    break;
+                case "delete":
+                    response = (Bullet) rest.delete(url, hdrs);
+                    break;
+                case "soap":
+                    response = (Bullet) soap.send(url, hdrs, bd, Proxy.NO_PROXY);
+                    ApiFactory.getApiFactory().getRequestRepository().put(this.getClass(), bd);
+                    break;
+                default:
+                    throw new UnsupportedOperationException("Request method " + requestMethod + " is not support");
+            }
+        } catch (InstantiationException | IllegalAccessException ex) {
+            log.error("Error with fire method implementation generate", ex);
+        }
+
+        return response;
+    }
+
+    /**
+     * Perform api request. Consist of prepare step, fill parameters step, build
+     * url and fire request step
+     *
+     * @return response
+     * @throws ApiException
+     */
+    public Object fireRequest() throws ApiException {
+        setDependentResponseParameters();
+        prepare();
+        fillParameters();
+
+        String requestUrl = ApiFactory.getApiRequestUrl();
+        String url = requestUrl + "/" + requestPath;
+
+        Object response = fire(url);
+        //Put response to response repository
+        ApiFactory.getApiFactory().addResponseToRepository(this.getClass(), (Bullet) response);
+        return response;
+    }
+
+    /**
+     * Perform api request. Consist of prepare step, fill parameters step, build
+     * url and fire request step
+     *
+     * @param url
+     * @return response
+     * @throws ApiException
+     */
+    public Object fireRequest(String url) throws ApiException {
+        setDependentResponseParameters();
+        prepare();
+        fillParameters();
+
+        Object response = fire(url);
+        //Put response to response repository
+        ApiFactory.getApiFactory().addResponseToRepository(this.getClass(), (Bullet) response);
+        return response;
+    }
+
+    /**
+     * Perform action validation rule
+     *
+     * @param title a {@link java.lang.String} object.
+     * @param params a {@link java.lang.Object} object.
+     * @throws java.lang.Throwable if any.
+     */
+    public void fireValidationRule(String title, Object... params) throws Throwable {
+        Method[] methods = this.getClass().getMethods();
+        for (Method method : methods) {
+            if (null != method.getAnnotation(ApiValidationRule.class)
+                    && method.getAnnotation(ApiValidationRule.class).title().equals(title)) {
+                try {
+                    method.invoke(this, params);
+                } catch (InvocationTargetException e) {
+                    log.error("Failed to invoke method", e);
+                    throw e.getCause();
+                }
+                return;
+            }
+        }
+        throw new ApiEntryInitializationException("There is no '" + title + "' validation rule in '" + this.getActionTitle() + "' api entry.");
+    }
+
+    /**
+     * Get parameters annotated by ApiRequestParam. Fill it by another response
+     * if annotated by DependentResponseParam, put value in stash and add
+     * brackets by the way.
+     *
+     * @throws ApiException
+     */
+    public void applyParametersAnnotation() throws ApiException {
+        //for each field in api request object search for annotations
+        List<Field> fieldList = FieldUtils.getDeclaredFieldsWithInheritance(this.getClass());
+        for (Field field : fieldList) {
+            field.setAccessible(true);
+
+            String name = null;
+            String value = null;
+
+            //@ApiRequestParam. Get field name and value
+            if (null != field.getAnnotation(ApiRequestParam.class)) {
+                name = field.getName();
+                try {
+                    value = (String) field.get(this);
+                } catch (IllegalArgumentException | IllegalAccessException ex) {
+                    throw new ApiEntryInitializationException("Parameter with name '" + name + "' is not available", ex);
+                }
+            }
+
+            //@PutInStash. Put name (or title) and value to stash
+            if (null != field.getAnnotation(PutInStash.class)) {
+                PutInStash putInStashAnnotation = field.getAnnotation(PutInStash.class);
+                switch (putInStashAnnotation.by()) {
+                    case NAME:
+                        try {
+                            Stash.getInstance().put(field.getName(), (String) field.get(this));
+                        } catch (IllegalArgumentException | IllegalAccessException ex) {
+                            throw new ApiEntryInitializationException("Parameter with name '" + name + "' is not available", ex);
+                        }
+                        break;
+                    case TITLE:
+                        //TODO handle if there is no @ApiRequestParam annotation on field
+                        Stash.getInstance().put(field.getAnnotation(ApiRequestParam.class).title(), value);
+                        break;
+                }
+            }
+
+            //set parameter value by name only if it has one of parameter's annotation
+            if (null != name) {
+                setParamValueByName(name, value);
+
+                //@AddBracket. Get name from value. Use it if value need to contains brackets.
+                if (null != field.getAnnotation(AddBracket.class)) {
+                    name = field.getAnnotation(AddBracket.class).value();
+                }
+                parameters.put(name, value);
+            }
+        }
+    }
+
+    /**
+     * Get and fill api entry headers
+     *
+     * @throws ru.sbtqa.tag.apifactory.exception.ApiException
+     */
+    private void setHeaders() throws ApiException {
+        List<Field> fieldList = FieldUtils.getDeclaredFieldsWithInheritance(this.getClass());
+        for (Field field : fieldList) {
+            for (Annotation annotation : field.getAnnotations()) {
+                if (annotation instanceof ApiRequestHeader) {
+                    field.setAccessible(true);
+                    try {
+                        headers.put(((ApiRequestHeader) annotation).header(), (String) field.get(this));
+                    } catch (IllegalArgumentException | IllegalAccessException ex) {
+                        throw new ApiEntryInitializationException("Parameter with headers title '" + ((ApiRequestHeader) annotation).header() + "' is not available", ex);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Get request body. Get request body template from resources
+     *
+     * @throws ru.sbtqa.tag.apifactory.exception.ApiException
+     */
+    public void setBody() throws ApiException {
+        if (!"".equals(template)) {
+            //get body template from resources
+            String templatePath = Props.get("api.template.path", "");
+            String templateFullPath = templatePath + template;
+            try {
+                body = IOUtils.toString(getClass().getClassLoader().getResourceAsStream(templateFullPath)).replace("\uFEFF", "");
+            } catch (NullPointerException ex) {
+                throw new ApiEntryInitializationException("Can't find template file by path " + templateFullPath, ex);
+            } catch (IOException ex) {
+                throw new ApiEntryInitializationException("Template file '" + templateFullPath + "' is not available", ex);
+            }
+
+            //replace %parameter on parameter value
+            parameters.entrySet().forEach((parameter) -> {
+                body = body.replaceAll("%" + parameter.getKey(), (String) parameter.getValue());
+            });
+        }
+    }
+
+    @SuppressWarnings("ThrowableResultIgnored")
+    private void setDependentResponseParameters() throws ApiException {
+        List<Field> fieldList = FieldUtils.getDeclaredFieldsWithInheritance(this.getClass());
+        for (Field field : fieldList) {
+            field.setAccessible(true);
+
+            //@DependentResponseParam. Go to response in responseEntry and get some value by path
+            if (null != field.getAnnotation(DependentResponseParam.class)) {
+                DependentResponseParam dependantParamAnnotation = field.getAnnotation(DependentResponseParam.class);
+                String fieldValue = null;
+
+                if (!dependantParamAnnotation.header().equals("")) {
+                    Map<String, String> dependantResponseHeaders = ApiFactory.getApiFactory().getResponseRepository().getHeaders(dependantParamAnnotation.responseEntry());
+                    for (Map.Entry<String, String> header : dependantResponseHeaders.entrySet()) {
+                        if (header.getKey().equals(dependantParamAnnotation.header())) {
+                            fieldValue = header.getValue();
+                        }
+                    }
+                } else {
+                    Object dependantResponseBody = ApiFactory.getApiFactory().getResponseRepository().getBody(dependantParamAnnotation.responseEntry());
+
+                    //Use applied parser to get value by path throw the callback
+                    if (ApiFactory.getApiFactory().getParser() != null) {
+                        Object callbackResult = null;
+                        try {
+                            ParserItem item = new ParserItem((String) dependantResponseBody, dependantParamAnnotation.path());
+                            callbackResult = ApiFactory.getApiFactory().getParser().getConstructor().newInstance().call(item);
+                        } catch (InstantiationException | IllegalAccessException | NoSuchMethodException | SecurityException | InvocationTargetException ex) {
+                            throw new ApiEntryInitializationException("Could not initialize parser callback", ex);
+                        } catch (NoSuchElementException e) {
+                            log.debug("No such element in callback", e);
+                            if (!field.getAnnotation(DependentResponseParam.class).necessity()) {
+                                fieldValue = null;
+                            } else {
+                                throw new NoSuchElementException(e.getMessage());
+                            }
+                        }
+                        if (callbackResult instanceof Exception) {
+                            throw (ApiException) callbackResult;
+                        } else {
+                            fieldValue = (String) callbackResult;
+                        }
+                    } else {
+                        throw new ApiEntryInitializationException("Could not initialize parser callback");
+                    }
+                }
+
+                if (!"".equals(dependantParamAnnotation.mask())) {
+                    Matcher matcher = Pattern.compile(dependantParamAnnotation.mask()).matcher(fieldValue);
+                    fieldValue = "";
+                    if (matcher.find()) {
+                        fieldValue = matcher.group(1);
+                    }
+                }
+
+                parameters.put(field.getName(), fieldValue);
+                setParamValueByName(field.getName(), fieldValue);
+            }
+        }
+    }
+
+    /**
+     * Get headers
+     *
+     * @return the headers
+     */
+    public Map<String, String> getHeaders() {
+        return headers;
+    }
+
+    /**
+     * Get parameters
+     *
+     * @return the parameters
+     */
+    public Map<String, String> getParameters() {
+        return parameters;
+    }
+
+    /**
+     * Get request body
+     *
+     * @return the body
+     */
+    public String getBody() {
+        return body;
+    }
+
+    /**
+     * Get template name
+     *
+     * @return the template
+     */
+    public String getTemplate() {
+        return template;
+    }
+
+    /**
+     * Set template name
+     *
+     * @param template the template to set
+     */
+    public void setTemplate(String template) {
+        this.template = template;
+    }
+
+    /**
+     * Get api action path
+     *
+     * @return action path
+     */
+    public String getActionPath() {
+        return requestPath;
+
+    }
+
+    /**
+     * Get api action title
+     *
+     * @return title
+     */
+    public String getActionTitle() {
+        return this.getClass().getAnnotation(ApiAction.class).title();
+    }
+}
