@@ -363,7 +363,8 @@ public abstract class ApiEntry {
 
             //replace %parameter on parameter value
             parameters.entrySet().forEach((parameter) -> {
-                body = body.replaceAll("%" + parameter.getKey(), (String) parameter.getValue());
+                String value = (null != parameter.getValue()) ? (String) parameter.getValue() : "";
+                body = body.replaceAll("%" + parameter.getKey(), value);
             });
         }
     }
