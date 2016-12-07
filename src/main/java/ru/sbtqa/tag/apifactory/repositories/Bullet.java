@@ -6,7 +6,7 @@ import java.util.Map;
 /**
  * Simple request (response) view. It consists of headers and body
  *
- * @author Konstantin Maltsev <mkypers@gmail.com>
+ *
  */
 public class Bullet {
 

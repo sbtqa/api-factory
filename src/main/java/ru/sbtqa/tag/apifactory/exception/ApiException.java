@@ -2,7 +2,7 @@ package ru.sbtqa.tag.apifactory.exception;
 
 /**
  *
- * @author Konstantin Maltsev <mkypers@gmail.com>
+ *
  */
 public class ApiException extends Exception {
 

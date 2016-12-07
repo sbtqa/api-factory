@@ -2,7 +2,7 @@ package ru.sbtqa.tag.apifactory.exception;
 
 /**
  *
- * @author Viktor Sidochenko <viktor.sidochenko@gmail.com>
+ *
  */
 public class ApiEntryInitializationException extends ApiException {
 

@@ -8,7 +8,7 @@ import java.lang.annotation.Target;
 /**
  * Api request parameter title.
  *
- * @author Viktor Sidochenko <viktor.sidochenko@gmail.com>
+ *
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)

@@ -36,7 +36,7 @@ import ru.sbtqa.tag.qautils.reflect.FieldUtils;
  * Api object (ala Page object). Request to definite url with a set of
  * parameters such as request method, parameters, response validation.
  *
- * @author Konstantin Maltsev <mkypers@gmail.com>
+ *
  */
 public abstract class ApiEntry {
 
@@ -53,7 +53,7 @@ public abstract class ApiEntry {
      *
      * @param title a {@link java.lang.String} object.
      * @param value a {@link java.lang.String} object.
-     * @throws ru.sbtqa.tag.apifactory.exception.ApiException
+     * @throws ru.sbtqa.tag.apifactory.exception.ApiException if 
      */
     public void setParamValueByTitle(String title, String value) throws ApiException {
         List<Field> fieldList = FieldUtils.getDeclaredFieldsWithInheritance(this.getClass());
@@ -80,7 +80,7 @@ public abstract class ApiEntry {
      *
      * @param name a {@link java.lang.String} object.
      * @param value a {@link java.lang.String} object.
-     * @throws ru.sbtqa.tag.apifactory.exception.ApiException
+     * @throws ru.sbtqa.tag.apifactory.exception.ApiException if parameter with name doesn't exists or not available
      */
     private void setParamValueByName(String name, String value) throws ApiException {
         List<Field> fieldList = FieldUtils.getDeclaredFieldsWithInheritance(this.getClass());
@@ -101,7 +101,7 @@ public abstract class ApiEntry {
     /**
      * Fill request parameters from data table
      *
-     * @param params
+     * @param params the list of parameters
      */
     public void fillParams(Map<String, String> params) {
         params.forEach((k, v) -> {
@@ -117,7 +117,7 @@ public abstract class ApiEntry {
      * Fill api request parameters, api request headers, request body and
      * replace templates in requestPath
      *
-     * @throws ru.sbtqa.tag.apifactory.exception.ApiException
+     * @throws ru.sbtqa.tag.apifactory.exception.ApiException if there is an error in setters method
      */
     public void fillParameters() throws ApiException {
         applyParametersAnnotation();
@@ -134,7 +134,7 @@ public abstract class ApiEntry {
      * Override it if you want to do pre-fire actions such as database run-up,
      * test data prepare or something else
      *
-     * @throws ru.sbtqa.tag.apifactory.exception.ApiException
+     * @throws ru.sbtqa.tag.apifactory.exception.ApiException if there is an error in user's prepare steps
      */
     public void prepare() throws ApiException {
 
@@ -146,7 +146,7 @@ public abstract class ApiEntry {
      *
      * @param url action target
      * @return response
-     * @throws ru.sbtqa.tag.apifactory.exception.ApiException
+     * @throws ru.sbtqa.tag.apifactory.exception.ApiException if response is not an instance of bullet type
      */
     public Object fire(String url) throws ApiException {
         //Get request method of current api object
@@ -205,8 +205,8 @@ public abstract class ApiEntry {
      * Perform api request. Consist of prepare step, fill parameters step, build
      * url and fire request step
      *
-     * @return response
-     * @throws ApiException
+     * @return response 
+     * @throws ApiException if there is an error in setters, prepare or fire methods
      */
     public Object fireRequest() throws ApiException {
         setDependentResponseParameters();
@@ -226,9 +226,9 @@ public abstract class ApiEntry {
      * Perform api request. Consist of prepare step, fill parameters step, build
      * url and fire request step
      *
-     * @param url
+     * @param url target url to fire
      * @return response
-     * @throws ApiException
+     * @throws ApiException if there is an error in setters, prepare or fire methods
      */
     public Object fireRequest(String url) throws ApiException {
         setDependentResponseParameters();
@@ -270,7 +270,7 @@ public abstract class ApiEntry {
      * if annotated by DependentResponseParam, put value in stash and add
      * brackets by the way.
      *
-     * @throws ApiException
+     * @throws ApiException if one of parameters is not available
      */
     public void applyParametersAnnotation() throws ApiException {
         //for each field in api request object search for annotations
@@ -325,7 +325,7 @@ public abstract class ApiEntry {
     /**
      * Get and fill api entry headers
      *
-     * @throws ru.sbtqa.tag.apifactory.exception.ApiException
+     * @throws ru.sbtqa.tag.apifactory.exception.ApiException if one of headers is not available
      */
     private void setHeaders() throws ApiException {
         List<Field> fieldList = FieldUtils.getDeclaredFieldsWithInheritance(this.getClass());
@@ -346,7 +346,7 @@ public abstract class ApiEntry {
     /**
      * Get request body. Get request body template from resources
      *
-     * @throws ru.sbtqa.tag.apifactory.exception.ApiException
+     * @throws ru.sbtqa.tag.apifactory.exception.ApiException if template file doesn't exist or not available
      */
     public void setBody() throws ApiException {
         if (!"".equals(template)) {

@@ -10,7 +10,7 @@ import ru.sbtqa.tag.apifactory.ApiEntry;
  * Response repository. Contains responses as pair of ApiRequestEntry.class and
  * {@link ru.sbtqa.tag.apifactory.repositories.Bullet} object.
  *
- * @author Konstantin Maltsev <mkypers@gmail.com>
+ *
  */
 public class ResponseRepository {
 
@@ -21,7 +21,7 @@ public class ResponseRepository {
     /**
      * Get headers pairs name-value by ApiRequestEntry.class
      *
-     * @param apiEntry
+     * @param apiEntry api object class of request
      * @return headers as Map
      */
     public Map<String, String> getHeaders(Class<? extends ApiEntry> apiEntry) {

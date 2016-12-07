@@ -4,7 +4,7 @@ import ru.sbtqa.tag.qautils.properties.Props;
 
 /**
  *
- * @author Konstantin Maltsev <mkypers@gmail.com>
+ *
  */
 public class ApiFactory {
 
@@ -35,7 +35,7 @@ public class ApiFactory {
     /**
      * Set api request url
      *
-     * @param apiRequestUrl
+     * @param apiRequestUrl request url
      */
     public static void setApiRequestUrl(String apiRequestUrl) {
         ApiFactory.apiRequestUrl = apiRequestUrl;

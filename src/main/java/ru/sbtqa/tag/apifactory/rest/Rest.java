@@ -5,7 +5,7 @@ import ru.sbtqa.tag.apifactory.exception.ApiRestException;
 
 /**
  *
- * @author Konstantin Maltsev <mkypers@gmail.com>
+ *
  */
 public interface Rest {
 

@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 http://maven.apache.org/xsd/settings-1.0.0.xsd">
+    <pluginGroups>
+    </pluginGroups>
+    <proxies>
+    </proxies>
+    <servers>
+        <server>
+            <id>ossrh</id>
+            <username>${env.SONATYPE_USERNAME}</username>
+            <password>${env.SONATYPE_PASSWORD}</password>
+        </server>
+    </servers>
+    <mirrors>
+    </mirrors>
+    <profiles>
+        <profile>
+            <id>repo-list</id>
+            <repositories>
+                <repository>
+                    <id>am</id>
+                    <name>Apache Maven2 Central Repository</name>
+                    <url>https://repo.maven.apache.org/maven2</url>
+                    <layout>default</layout>
+                    <snapshots>
+                        <enabled>false</enabled>
+                    </snapshots>
+                    <releases>
+                        <updatePolicy>never</updatePolicy>
+                    </releases>
+                </repository>
+                <repository>
+                    <id>ossrh</id>
+                    <name>OSS Sonatype Repository</name>
+                    <releases>
+                        <enabled>true</enabled>
+                    </releases>
+                    <snapshots>
+                        <updatePolicy>never</updatePolicy>
+                    </snapshots>
+                    <url>https://oss.sonatype.org/content/repositories/releases/</url>
+                </repository>
+                <repository>
+                    <id>jenkins</id>
+                    <name>Jenkins Repository</name>
+                    <releases>
+                        <enabled>true</enabled>
+                    </releases>
+                    <snapshots>
+                        <updatePolicy>never</updatePolicy>
+                    </snapshots>
+                    <url>http://repo.jenkins-ci.org/releases/</url>
+                </repository>
+            </repositories>
+            <properties>
+                <gpg.executable>${env.GPG_EXECUTABLE}</gpg.executable>
+                <gpg.passphrase>${env.GPG_PASSPHRASE}</gpg.passphrase>
+            </properties>
+        </profile>
+    </profiles>
+    <activeProfiles>
+        <activeProfile>repo-list</activeProfile>
+    </activeProfiles>
+</settings>

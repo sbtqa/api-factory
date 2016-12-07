@@ -6,7 +6,7 @@ import ru.sbtqa.tag.apifactory.exception.ApiSoapException;
 
 /**
  *
- * @author Konstantin Maltsev <mkypers@gmail.com>
+ *
  */
 public interface Soap {
 

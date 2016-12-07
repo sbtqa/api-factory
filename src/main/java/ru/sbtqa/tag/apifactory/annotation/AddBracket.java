@@ -8,7 +8,7 @@ import java.lang.annotation.Target;
 /**
  * Change parameter name
  *
- * @author Vadim Polosov <warorc@ngs.ru>
+ *
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)

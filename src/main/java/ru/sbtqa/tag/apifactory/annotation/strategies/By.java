@@ -3,7 +3,7 @@ package ru.sbtqa.tag.apifactory.annotation.strategies;
 /**
  * Naming parameter strategy
  *
- * @author Konstantin Maltsev <mkypers@gmail.com>
+ *
  */
 public enum By {
 

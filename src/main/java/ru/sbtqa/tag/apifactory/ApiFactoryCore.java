@@ -21,7 +21,7 @@ import ru.sbtqa.tag.qautils.parsers.interfaces.callback.ParserCallback;
  * <p>
  * ApiFactory class.</p>
  *
- * @author Viktor Sidochenko <viktor.sidochenko@gmail.com>
+ *
  */
 public class ApiFactoryCore {
 
@@ -51,7 +51,7 @@ public class ApiFactoryCore {
      *
      * @param title api entry title
      * @return api entry instance
-     * @throws ru.sbtqa.tag.apifactory.exception.ApiException
+     * @throws ru.sbtqa.tag.apifactory.exception.ApiException if api entry doesn't exist
      */
     public ApiEntry getApiEntry(String title) throws ApiException {
         if (null != currentEntry) {
@@ -72,11 +72,8 @@ public class ApiFactoryCore {
      *
      * @param packageName api entry package name
      * @param title api entry title
-     * @return
-     * @throws IllegalAccessException
-     * @throws NoSuchMethodException
-     * @throws InvocationTargetException
-     * @throws InstantiationException
+     * @return api entry instance
+     * @throws ru.sbtqa.tag.apifactory.exception.ApiException if there is an error with parameters initialize
      */
     private ApiEntry getApiEntry(String packageName, String title) throws ApiException {
         Reflections reflections = new Reflections(packageName);
@@ -109,7 +106,7 @@ public class ApiFactoryCore {
      * Returns currently initialized api entry
      *
      * @return api entry
-     * @throws ru.sbtqa.tag.apifactory.exception.ApiException
+     * @throws ru.sbtqa.tag.apifactory.exception.ApiException if there are an error with api entry initialize
      */
     public ApiEntry getCurrentApiEntry() throws ApiException {
         if (null == currentEntry) {
@@ -157,8 +154,8 @@ public class ApiFactoryCore {
     /**
      * Add response to repository
      *
-     * @param clazz
-     * @param bullet
+     * @param clazz the api entry
+     * @param bullet the {@link ru.sbtqa.tag.apifactory.repositories.Bullet} response
      */
     public void addResponseToRepository(Class<? extends ApiEntry> clazz, Bullet bullet) {
         this.responseRepository.addHeaders(clazz, bullet.getHeaders());
@@ -168,8 +165,8 @@ public class ApiFactoryCore {
     /**
      * Add response headers to repository
      *
-     * @param clazz
-     * @param headers
+     * @param clazz the api entry
+     * @param headers the list of headers of response
      */
     public void addResponseHeadersToRepository(Class<? extends ApiEntry> clazz, Map<String, String> headers) {
         this.responseRepository.addHeaders(clazz, headers);
@@ -178,8 +175,8 @@ public class ApiFactoryCore {
     /**
      * Add response body to repository
      *
-     * @param clazz
-     * @param body
+     * @param clazz the api entry
+     * @param body the body of response
      */
     public void addResponseBodyToRepository(Class<? extends ApiEntry> clazz, String body) {
         this.responseRepository.addBody(clazz, body);
@@ -195,11 +192,11 @@ public class ApiFactoryCore {
     /**
      * Add request to repository
      *
-     * @param clazz
-     * @param result
+     * @param clazz the api entry
+     * @param request the request
      */
-    public void addRequestToRepository(Class<? extends ApiEntry> clazz, Object result) {
-        this.requestRepository.put(clazz, result);
+    public void addRequestToRepository(Class<? extends ApiEntry> clazz, Object request) {
+        this.requestRepository.put(clazz, request);
     }
 
     /**

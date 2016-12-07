@@ -9,7 +9,7 @@ import ru.sbtqa.tag.apifactory.annotation.strategies.By;
 /**
  * Put parameter value in stash
  *
- * @author Vadim Polosov <warorc@ngs.ru>
+ *
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)

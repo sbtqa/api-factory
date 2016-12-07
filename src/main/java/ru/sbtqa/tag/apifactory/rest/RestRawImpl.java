@@ -17,7 +17,7 @@ import ru.sbtqa.tag.qautils.properties.Props;
 
 /**
  *
- * @author Konstantin Maltsev <mkypers@gmail.com>
+ *
  */
 public class RestRawImpl implements Rest {
 

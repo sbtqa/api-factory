@@ -9,7 +9,7 @@ import java.lang.annotation.Target;
  * Dependent response. Optional annotation. It will be used to try to initialize
  * api entry parameter from response of previous executed request to api.
  *
- * @author Viktor Sidochenko <viktor.sidochenko@gmail.com>
+ *
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)

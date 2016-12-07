@@ -10,7 +10,7 @@ import ru.sbtqa.tag.apifactory.EmptyApiEntry;
 /**
  * This annotation used above ApiEntry class declaration
  *
- * @author Viktor Sidochenko <viktor.sidochenko@gmail.com>
+ *
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)

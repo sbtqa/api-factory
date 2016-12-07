@@ -23,7 +23,7 @@ import ru.sbtqa.tag.qautils.properties.Props;
 
 /**
  *
- * @author Konstantin Maltsev <mkypers@gmail.com>
+ *
  */
 public class SoapImpl implements Soap {
 

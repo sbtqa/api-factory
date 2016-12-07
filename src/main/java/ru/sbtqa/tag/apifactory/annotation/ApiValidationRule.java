@@ -9,7 +9,7 @@ import java.lang.annotation.Target;
  * Api response validation rule. To be executed, it must be directly called from
  * feature.
  *
- * @author Viktor Sidochenko <viktor.sidochenko@gmail.com>
+ *
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
