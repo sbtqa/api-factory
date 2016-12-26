@@ -13,6 +13,7 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.utils.HttpClientUtils;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
@@ -36,45 +37,50 @@ public class RestEntityImpl implements Rest {
     @Override
     public Bullet get(String url, Map<String, String> headers) throws ApiRestException {
         HttpClient client = HttpClients.createDefault();
-
-        log.info("Request url {}", url);
-        HttpGet get = new HttpGet(url);
-
-        headers.entrySet()
-                .stream()
-                .forEach(h -> {
-                    get.setHeader(h.getKey(), h.getValue());
-                });
-        log.info("Request headers {}", headers);
-
-        HttpResponse response = null;
-        try {
-            response = client.execute(get);
-        } catch (IOException ex) {
-            log.error("Ошибка при выполнении запроса", ex);
-            throw new AutotestError(ex);
-          
-        }
-        Map<String, String> headersResponse = new HashMap<>();
-        for (Header h : response.getAllHeaders()) {
-            ParamsHelper.addParam(h.getName(), h.getValue());
-            if (headersResponse.containsKey(h.getName())) {
-                headersResponse.put(h.getName(), headersResponse.get(h.getName()) + "; " + h.getValue());
-            } else {
-                headersResponse.put(h.getName(), h.getValue());
-            }
-        }
-
-        if (response.getStatusLine().getStatusCode() != 200) {
-            log.error("Статус ответа '{}'", response.getStatusLine().getReasonPhrase());
-            throw new AutotestError("Статус ответа не равен 200");
-        }
-
         Bullet bullet = null;
+
         try {
-            bullet = new Bullet(headersResponse, EntityUtils.toString(response.getEntity()));
-        } catch (IOException | ParseException ex) {
-            log.error("Error in response body get", ex);
+            log.info("Request url {}", url);
+            HttpGet get = new HttpGet(url);
+
+            headers.entrySet()
+                  .stream()
+                  .forEach(h -> {
+                      get.setHeader(h.getKey(), h.getValue());
+                  });
+            log.info("Request headers {}", headers);
+
+            HttpResponse response = null;
+            try {
+                response = client.execute(get);
+            } catch (IOException ex) {
+                log.error("Ошибка при выполнении запроса", ex);
+                throw new AutotestError(ex);
+
+            }
+            Map<String, String> headersResponse = new HashMap<>();
+            for (Header h : response.getAllHeaders()) {
+                ParamsHelper.addParam(h.getName(), h.getValue());
+                if (headersResponse.containsKey(h.getName())) {
+                    headersResponse.put(h.getName(), headersResponse.get(h.getName()) + "; " + h.getValue());
+                } else {
+                    headersResponse.put(h.getName(), h.getValue());
+                }
+            }
+
+            if (response.getStatusLine().getStatusCode() != 200) {
+                log.error("Статус ответа '{}'", response.getStatusLine().getReasonPhrase());
+                throw new AutotestError("Статус ответа не равен 200");
+            }
+
+            try {
+                bullet = new Bullet(headersResponse, EntityUtils.toString(response.getEntity()));
+            } catch (IOException | ParseException ex) {
+                log.error("Error in response body get", ex);
+            }
+
+        } finally {
+            HttpClientUtils.closeQuietly(client);
         }
 
         return bullet;
@@ -82,26 +88,26 @@ public class RestEntityImpl implements Rest {
 
     @Override
     public Bullet post(String url, Map<String, String> headers, Object body) throws ApiRestException {
+        HttpClient client = HttpClients.createDefault();
+        
         try {
-            HttpClient client = HttpClients.createDefault();
-
             log.info("Sending 'POST' request to URL : {}", url);
             HttpPost post = new HttpPost(url);
 
             headers.entrySet()
-                    .stream()
-                    .forEach(h -> {
-                        post.setHeader(h.getKey(), h.getValue());
-                    });
+                  .stream()
+                  .forEach(h -> {
+                      post.setHeader(h.getKey(), h.getValue());
+                  });
             log.info("Headers are: {}", headers);
 
             List<NameValuePair> postParams;
             if (body instanceof Map) {
                 Map<String, String> params = (Map<String, String>) body;
                 postParams = params.entrySet()
-                        .stream()
-                        .map(e -> new BasicNameValuePair(e.getKey(), e.getValue()))
-                        .collect(Collectors.toList());
+                      .stream()
+                      .map(e -> new BasicNameValuePair(e.getKey(), e.getValue()))
+                      .collect(Collectors.toList());
                 if (!postParams.isEmpty()) {
                     post.setEntity(new UrlEncodedFormEntity(postParams));
                 }
@@ -127,11 +133,11 @@ public class RestEntityImpl implements Rest {
                 }
             }
 
-            Bullet bullet = new Bullet(headersResponse, EntityUtils.toString(response.getEntity()));
-
-            return bullet;
+            return new Bullet(headersResponse, EntityUtils.toString(response.getEntity()));
         } catch (IOException ex) {
-            log.error("TODO", ex);
+            log.error("Failed to get response", ex);
+        } finally {
+            HttpClientUtils.closeQuietly(client);
         }
 
         return null;

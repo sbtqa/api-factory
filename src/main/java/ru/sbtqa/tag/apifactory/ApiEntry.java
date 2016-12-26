@@ -30,7 +30,7 @@ import ru.sbtqa.tag.apifactory.soap.Soap;
 import ru.sbtqa.tag.datajack.Stash;
 import ru.sbtqa.tag.qautils.parsers.ParserItem;
 import ru.sbtqa.tag.qautils.properties.Props;
-import ru.sbtqa.tag.qautils.reflect.FieldUtils;
+import ru.sbtqa.tag.qautils.reflect.FieldUtilsExt;
 
 /**
  * Api object (ala Page object). Request to definite url with a set of
@@ -56,7 +56,7 @@ public abstract class ApiEntry {
      * @throws ru.sbtqa.tag.apifactory.exception.ApiException if 
      */
     public void setParamValueByTitle(String title, String value) throws ApiException {
-        List<Field> fieldList = FieldUtils.getDeclaredFieldsWithInheritance(this.getClass());
+        List<Field> fieldList = FieldUtilsExt.getDeclaredFieldsWithInheritance(this.getClass());
         for (Field field : fieldList) {
             for (Annotation annotation : field.getAnnotations()) {
                 if (annotation instanceof ApiRequestParam
@@ -83,7 +83,7 @@ public abstract class ApiEntry {
      * @throws ru.sbtqa.tag.apifactory.exception.ApiException if parameter with name doesn't exists or not available
      */
     private void setParamValueByName(String name, String value) throws ApiException {
-        List<Field> fieldList = FieldUtils.getDeclaredFieldsWithInheritance(this.getClass());
+        List<Field> fieldList = FieldUtilsExt.getDeclaredFieldsWithInheritance(this.getClass());
         for (Field field : fieldList) {
             if (name.equals(field.getName())) {
                 field.setAccessible(true);
@@ -246,18 +246,17 @@ public abstract class ApiEntry {
      *
      * @param title a {@link java.lang.String} object.
      * @param params a {@link java.lang.Object} object.
-     * @throws java.lang.Throwable if any.
+     * @throws ru.sbtqa.tag.apifactory.exception.ApiException if can't invoke method 
      */
-    public void fireValidationRule(String title, Object... params) throws Throwable {
+    public void fireValidationRule(String title, Object... params) throws ApiException {
         Method[] methods = this.getClass().getMethods();
         for (Method method : methods) {
             if (null != method.getAnnotation(ApiValidationRule.class)
                     && method.getAnnotation(ApiValidationRule.class).title().equals(title)) {
                 try {
                     method.invoke(this, params);
-                } catch (InvocationTargetException e) {
-                    log.error("Failed to invoke method", e);
-                    throw e.getCause();
+                } catch (InvocationTargetException | IllegalAccessException | IllegalArgumentException e) {
+                    throw new ApiException("Failed to invoke method", e);
                 }
                 return;
             }
@@ -274,7 +273,7 @@ public abstract class ApiEntry {
      */
     public void applyParametersAnnotation() throws ApiException {
         //for each field in api request object search for annotations
-        List<Field> fieldList = FieldUtils.getDeclaredFieldsWithInheritance(this.getClass());
+        List<Field> fieldList = FieldUtilsExt.getDeclaredFieldsWithInheritance(this.getClass());
         for (Field field : fieldList) {
             field.setAccessible(true);
 
@@ -297,14 +296,14 @@ public abstract class ApiEntry {
                 switch (putInStashAnnotation.by()) {
                     case NAME:
                         try {
-                            Stash.getInstance().put(field.getName(), (String) field.get(this));
+                            Stash.asMap().put(field.getName(), (String) field.get(this));
                         } catch (IllegalArgumentException | IllegalAccessException ex) {
                             throw new ApiEntryInitializationException("Parameter with name '" + name + "' is not available", ex);
                         }
                         break;
                     case TITLE:
                         //TODO handle if there is no @ApiRequestParam annotation on field
-                        Stash.getInstance().put(field.getAnnotation(ApiRequestParam.class).title(), value);
+                        Stash.asMap().put(field.getAnnotation(ApiRequestParam.class).title(), value);
                         break;
                 }
             }
@@ -328,7 +327,7 @@ public abstract class ApiEntry {
      * @throws ru.sbtqa.tag.apifactory.exception.ApiException if one of headers is not available
      */
     private void setHeaders() throws ApiException {
-        List<Field> fieldList = FieldUtils.getDeclaredFieldsWithInheritance(this.getClass());
+        List<Field> fieldList = FieldUtilsExt.getDeclaredFieldsWithInheritance(this.getClass());
         for (Field field : fieldList) {
             for (Annotation annotation : field.getAnnotations()) {
                 if (annotation instanceof ApiRequestHeader) {
@@ -371,7 +370,7 @@ public abstract class ApiEntry {
 
     @SuppressWarnings("ThrowableResultIgnored")
     private void setDependentResponseParameters() throws ApiException {
-        List<Field> fieldList = FieldUtils.getDeclaredFieldsWithInheritance(this.getClass());
+        List<Field> fieldList = FieldUtilsExt.getDeclaredFieldsWithInheritance(this.getClass());
         for (Field field : fieldList) {
             field.setAccessible(true);
 
@@ -380,7 +379,7 @@ public abstract class ApiEntry {
                 DependentResponseParam dependantParamAnnotation = field.getAnnotation(DependentResponseParam.class);
                 String fieldValue = null;
 
-                if (!dependantParamAnnotation.header().equals("")) {
+                if (!"".equals(dependantParamAnnotation.header())) {
                     Map<String, String> dependantResponseHeaders = ApiFactory.getApiFactory().getResponseRepository().getHeaders(dependantParamAnnotation.responseEntry());
                     for (Map.Entry<String, String> header : dependantResponseHeaders.entrySet()) {
                         if (header.getKey().equals(dependantParamAnnotation.header())) {
@@ -400,9 +399,7 @@ public abstract class ApiEntry {
                             throw new ApiEntryInitializationException("Could not initialize parser callback", ex);
                         } catch (NoSuchElementException e) {
                             log.debug("No such element in callback", e);
-                            if (!field.getAnnotation(DependentResponseParam.class).necessity()) {
-                                fieldValue = null;
-                            } else {
+                            if (field.getAnnotation(DependentResponseParam.class).necessity()) {
                                 throw new NoSuchElementException(e.getMessage());
                             }
                         }

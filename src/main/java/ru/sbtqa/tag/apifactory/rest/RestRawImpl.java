@@ -48,15 +48,18 @@ public class RestRawImpl implements Rest {
         return fire("DELETE", url, headers, null, null);
     }
 
-    private Bullet fire(String method, String url, Map<String, String> headers, Object body, Proxy proxy) throws ApiRestException {
+    private Bullet fire(String mthd, String url, Map<String, String> headers, Object body, Proxy proxy) throws ApiRestException {
         try {
             URL obj = new URL(url.replaceAll(" ", "%20"));
             HttpURLConnection connection = (HttpURLConnection) obj.openConnection();
 
             //stackoverflow.com/question/25163131
-            if ("PATCH".equals(method)) {
+            String method;
+            if ("PATCH".equals(mthd)) {
                 method = "POST";
                 connection.setRequestProperty("X-HTTP-Method-Override", "PATCH");
+            } else {
+                method = mthd;
             }
 
             connection.setRequestMethod(method);

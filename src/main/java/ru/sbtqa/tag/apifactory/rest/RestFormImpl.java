@@ -81,11 +81,11 @@ public class RestFormImpl implements Rest {
             log.info("Sending '" + method + "' request to URL : {}", URLDecoder.decode(url, encoding));
             log.info("Body is : {}", body);
 
-            StringBuffer response;
+            StringBuilder response;
             try (BufferedReader in = new BufferedReader(
                     new InputStreamReader(connection.getInputStream(), encoding))) {
                 String inputLine;
-                response = new StringBuffer();
+                response = new StringBuilder();
                 while ((inputLine = in.readLine()) != null) {
                     response.append(inputLine);
                 }
