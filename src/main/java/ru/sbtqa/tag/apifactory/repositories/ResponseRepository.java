@@ -16,7 +16,7 @@ public class ResponseRepository {
 
     private static final Logger log = LoggerFactory.getLogger(ResponseRepository.class);
 
-    private final Map<Class<? extends ApiEntry>, Bullet> responseRepository = new LinkedHashMap<>();
+    private final Map<Class<? extends ApiEntry>, Bullet> instance = new LinkedHashMap<>();
 
     /**
      * Get headers pairs name-value by ApiRequestEntry.class
@@ -25,7 +25,7 @@ public class ResponseRepository {
      * @return headers as Map
      */
     public Map<String, String> getHeaders(Class<? extends ApiEntry> apiEntry) {
-        return responseRepository.get(apiEntry).getHeaders();
+        return instance.get(apiEntry).getHeaders();
     }
 
     /**
@@ -36,7 +36,7 @@ public class ResponseRepository {
      * @return {@link java.lang.String} header value
      */
     public String getHeader(Class<? extends ApiEntry> apiEntry, String headerName) {
-        return responseRepository.get(apiEntry).getHeader(headerName);
+        return instance.get(apiEntry).getHeader(headerName);
     }
 
     /**
@@ -46,7 +46,7 @@ public class ResponseRepository {
      * @return {@link java.lang.String} body
      */
     public String getBody(Class<? extends ApiEntry> apiEntry) {
-        return responseRepository.get(apiEntry).getBody();
+        return instance.get(apiEntry).getBody();
     }
 
     /**
@@ -57,14 +57,14 @@ public class ResponseRepository {
      */
     public void addBody(Class<? extends ApiEntry> apiEntry, String body) {
         Bullet bullet;
-        if (responseRepository.containsKey(apiEntry)) {
-            bullet = (Bullet) responseRepository.get(apiEntry);
+        if (instance.containsKey(apiEntry)) {
+            bullet = instance.get(apiEntry);
         } else {
             bullet = new Bullet();
         }
         bullet.setBody(body);
 
-        responseRepository.put(apiEntry, bullet);
+        instance.put(apiEntry, bullet);
         log.info("Added to repository key {} body {{}}", apiEntry.getName(), body);
     }
 
@@ -76,14 +76,14 @@ public class ResponseRepository {
      */
     public void addHeaders(Class<? extends ApiEntry> apiEntry, Map<String, String> headers) {
         Bullet bullet;
-        if (responseRepository.containsKey(apiEntry)) {
-            bullet = (Bullet) responseRepository.get(apiEntry);
+        if (instance.containsKey(apiEntry)) {
+            bullet = instance.get(apiEntry);
         } else {
             bullet = new Bullet();
         }
         bullet.setHeaders(headers);
 
-        responseRepository.put(apiEntry, bullet);
+        instance.put(apiEntry, bullet);
         log.info("Added to repository key {} headers {}", apiEntry.getName(), headers);
     }
 
@@ -94,7 +94,7 @@ public class ResponseRepository {
      */
     public Bullet getLastResponseInRepository() {
         Bullet response = null;
-        for (Map.Entry<Class<? extends ApiEntry>, Bullet> entry : responseRepository.entrySet()) {
+        for (Map.Entry<Class<? extends ApiEntry>, Bullet> entry : instance.entrySet()) {
             response = entry.getValue();
         }
         return response;

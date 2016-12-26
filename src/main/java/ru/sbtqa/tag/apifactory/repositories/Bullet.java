@@ -2,6 +2,8 @@ package ru.sbtqa.tag.apifactory.repositories;
 
 import java.util.HashMap;
 import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Simple request (response) view. It consists of headers and body
@@ -10,11 +12,13 @@ import java.util.Map;
  */
 public class Bullet {
 
+    private static final Logger log = LoggerFactory.getLogger(Bullet.class);
+    
     private Map<String, String> headers = new HashMap<>();
     private String body = null;
 
     public Bullet() {
-
+        log.info("Created empty bullet");
     }
 
     public Bullet(Map<String, String> headers, String body) {

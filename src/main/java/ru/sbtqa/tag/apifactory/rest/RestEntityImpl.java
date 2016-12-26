@@ -45,9 +45,7 @@ public class RestEntityImpl implements Rest {
 
             headers.entrySet()
                   .stream()
-                  .forEach(h -> {
-                      get.setHeader(h.getKey(), h.getValue());
-                  });
+                  .forEach(h -> get.setHeader(h.getKey(), h.getValue()));
             log.info("Request headers {}", headers);
 
             HttpResponse response = null;
@@ -96,9 +94,7 @@ public class RestEntityImpl implements Rest {
 
             headers.entrySet()
                   .stream()
-                  .forEach(h -> {
-                      post.setHeader(h.getKey(), h.getValue());
-                  });
+                  .forEach(h -> post.setHeader(h.getKey(), h.getValue()));
             log.info("Headers are: {}", headers);
 
             List<NameValuePair> postParams;

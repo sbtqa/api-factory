@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
-import java.net.Proxy;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.util.Map;
@@ -25,30 +24,30 @@ public class RestRawImpl implements Rest {
 
     @Override
     public Bullet get(String url, Map<String, String> headers) throws ApiRestException {
-        return fire("GET", url, headers, null, null);
+        return fire("GET", url, headers, null);
     }
 
     @Override
     public Bullet post(String url, Map<String, String> headers, Object body) throws ApiRestException {
-        return fire("POST", url, headers, body, null);
+        return fire("POST", url, headers, body);
     }
 
     @Override
     public Bullet put(String url, Map<String, String> headers, Object body) throws ApiRestException {
-        return fire("PUT", url, headers, body, null);
+        return fire("PUT", url, headers, body);
     }
 
     @Override
     public Bullet patch(String url, Map<String, String> headers, Object body) throws ApiRestException {
-        return fire("PATCH", url, headers, body, null);
+        return fire("PATCH", url, headers, body);
     }
 
     @Override
     public Bullet delete(String url, Map<String, String> headers) throws ApiRestException {
-        return fire("DELETE", url, headers, null, null);
+        return fire("DELETE", url, headers, null);
     }
 
-    private Bullet fire(String mthd, String url, Map<String, String> headers, Object body, Proxy proxy) throws ApiRestException {
+    private Bullet fire(String mthd, String url, Map<String, String> headers, Object body) throws ApiRestException {
         try {
             URL obj = new URL(url.replaceAll(" ", "%20"));
             HttpURLConnection connection = (HttpURLConnection) obj.openConnection();
@@ -96,8 +95,7 @@ public class RestRawImpl implements Rest {
                 log.error("Response return an error", e);
             }
             
-            Bullet bullet = new Bullet(null, response.toString());
-            return bullet;
+            return new Bullet(null, response.toString());
         } catch (Exception ex) {
             log.error("There are an error in fire method", ex);
         }

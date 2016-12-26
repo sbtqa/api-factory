@@ -83,12 +83,12 @@ public class ApiFactoryCore {
             if (null == entry.getAnnotation(ApiAction.class)) {
                 continue;
             }
-            String entryTitle = (String) entry.getAnnotation(ApiAction.class).title();
-            String entryPath = (String) entry.getAnnotation(ApiAction.class).path();
+            String entryTitle = entry.getAnnotation(ApiAction.class).title();
+            String entryPath = entry.getAnnotation(ApiAction.class).path();
             if (entryTitle.equals(title)) {
                 try {
                     @SuppressWarnings("unchecked")
-                    Constructor<ApiEntry> c = ((Constructor<ApiEntry>) entry.getConstructor());
+                    Constructor<ApiEntry> c = (Constructor<ApiEntry>) entry.getConstructor();
                     currentEntry = c.newInstance();
                     currentEntryTitle = title;
                     currentEntryPath = entryPath;

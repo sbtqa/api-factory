@@ -44,7 +44,7 @@ public class SoapImpl implements Soap {
                     URL clone = new URL(url.toString());
 
                     URLConnection connection;
-                    if (Proxy.NO_PROXY != proxy && proxy.address().toString().contains("0.0.0.0")) {
+                    if (Proxy.NO_PROXY != proxy) {
                         connection = clone.openConnection(proxy);
                     } else {
                         connection = clone.openConnection();
@@ -85,8 +85,7 @@ public class SoapImpl implements Soap {
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             response.writeTo(out);
             String responseBody = new String(out.toByteArray());
-            Bullet bullet = new Bullet(null, responseBody);
-            return bullet;
+            return new Bullet(null, responseBody);
         } catch (SOAPException | IOException ex) {
             log.error("There are a problem with get response soap body", ex);
         }

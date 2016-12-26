@@ -8,19 +8,23 @@ import ru.sbtqa.tag.qautils.properties.Props;
  */
 public class ApiFactory {
 
-    private static ApiFactoryCore apiFactoryHandler;
+    private static ApiFactoryCore instance;
     private static String apiRequestUrl = Props.get("api.baseurl");
 
+    private ApiFactory() {
+        throw new IllegalAccessError("Singleton class");
+    }
+    
     /**
      * Get api factory
      *
      * @return api factory
      */
     public static ApiFactoryCore getApiFactory() {
-        if (null == apiFactoryHandler) {
-            apiFactoryHandler = new ApiFactoryCore(Props.get("api.entries.package"));
+        if (null == instance) {
+            instance = new ApiFactoryCore(Props.get("api.entries.package"));
         }
-        return apiFactoryHandler;
+        return instance;
     }
 
     /**

@@ -53,15 +53,15 @@ public abstract class ApiEntry {
      *
      * @param title a {@link java.lang.String} object.
      * @param value a {@link java.lang.String} object.
-     * @throws ru.sbtqa.tag.apifactory.exception.ApiException if 
+     * @throws ru.sbtqa.tag.apifactory.exception.ApiException if
      */
     public void setParamValueByTitle(String title, String value) throws ApiException {
         List<Field> fieldList = FieldUtilsExt.getDeclaredFieldsWithInheritance(this.getClass());
         for (Field field : fieldList) {
             for (Annotation annotation : field.getAnnotations()) {
                 if (annotation instanceof ApiRequestParam
-                        && ((ApiRequestParam) annotation).title().equals(title)
-                        && value != null && !value.isEmpty()) {
+                      && ((ApiRequestParam) annotation).title().equals(title)
+                      && value != null && !value.isEmpty()) {
                     field.setAccessible(true);
                     try {
                         field.set(this, value);
@@ -80,7 +80,8 @@ public abstract class ApiEntry {
      *
      * @param name a {@link java.lang.String} object.
      * @param value a {@link java.lang.String} object.
-     * @throws ru.sbtqa.tag.apifactory.exception.ApiException if parameter with name doesn't exists or not available
+     * @throws ru.sbtqa.tag.apifactory.exception.ApiException if parameter with
+     * name doesn't exists or not available
      */
     private void setParamValueByName(String name, String value) throws ApiException {
         List<Field> fieldList = FieldUtilsExt.getDeclaredFieldsWithInheritance(this.getClass());
@@ -117,7 +118,8 @@ public abstract class ApiEntry {
      * Fill api request parameters, api request headers, request body and
      * replace templates in requestPath
      *
-     * @throws ru.sbtqa.tag.apifactory.exception.ApiException if there is an error in setters method
+     * @throws ru.sbtqa.tag.apifactory.exception.ApiException if there is an
+     * error in setters method
      */
     public void fillParameters() throws ApiException {
         applyParametersAnnotation();
@@ -125,7 +127,7 @@ public abstract class ApiEntry {
         setBody();
 
         //if api action path contains parameters like '%parameter' replace it with it value
-        parameters.entrySet().stream().forEach((parameter) -> {
+        parameters.entrySet().stream().forEach(parameter -> {
             requestPath = requestPath.replaceAll("%" + parameter.getKey(), (String) parameter.getValue());
         });
     }
@@ -134,7 +136,8 @@ public abstract class ApiEntry {
      * Override it if you want to do pre-fire actions such as database run-up,
      * test data prepare or something else
      *
-     * @throws ru.sbtqa.tag.apifactory.exception.ApiException if there is an error in user's prepare steps
+     * @throws ru.sbtqa.tag.apifactory.exception.ApiException if there is an
+     * error in user's prepare steps
      */
     public void prepare() throws ApiException {
 
@@ -146,7 +149,8 @@ public abstract class ApiEntry {
      *
      * @param url action target
      * @return response
-     * @throws ru.sbtqa.tag.apifactory.exception.ApiException if response is not an instance of bullet type
+     * @throws ru.sbtqa.tag.apifactory.exception.ApiException if response is not
+     * an instance of bullet type
      */
     public Object fire(String url) throws ApiException {
         //Get request method of current api object
@@ -205,8 +209,9 @@ public abstract class ApiEntry {
      * Perform api request. Consist of prepare step, fill parameters step, build
      * url and fire request step
      *
-     * @return response 
-     * @throws ApiException if there is an error in setters, prepare or fire methods
+     * @return response
+     * @throws ApiException if there is an error in setters, prepare or fire
+     * methods
      */
     public Object fireRequest() throws ApiException {
         setDependentResponseParameters();
@@ -228,7 +233,8 @@ public abstract class ApiEntry {
      *
      * @param url target url to fire
      * @return response
-     * @throws ApiException if there is an error in setters, prepare or fire methods
+     * @throws ApiException if there is an error in setters, prepare or fire
+     * methods
      */
     public Object fireRequest(String url) throws ApiException {
         setDependentResponseParameters();
@@ -246,13 +252,14 @@ public abstract class ApiEntry {
      *
      * @param title a {@link java.lang.String} object.
      * @param params a {@link java.lang.Object} object.
-     * @throws ru.sbtqa.tag.apifactory.exception.ApiException if can't invoke method 
+     * @throws ru.sbtqa.tag.apifactory.exception.ApiException if can't invoke
+     * method
      */
     public void fireValidationRule(String title, Object... params) throws ApiException {
         Method[] methods = this.getClass().getMethods();
         for (Method method : methods) {
             if (null != method.getAnnotation(ApiValidationRule.class)
-                    && method.getAnnotation(ApiValidationRule.class).title().equals(title)) {
+                  && method.getAnnotation(ApiValidationRule.class).title().equals(title)) {
                 try {
                     method.invoke(this, params);
                 } catch (InvocationTargetException | IllegalAccessException | IllegalArgumentException e) {
@@ -302,8 +309,11 @@ public abstract class ApiEntry {
                         }
                         break;
                     case TITLE:
-                        //TODO handle if there is no @ApiRequestParam annotation on field
-                        Stash.asMap().put(field.getAnnotation(ApiRequestParam.class).title(), value);
+                        if (null != field.getAnnotation(ApiRequestParam.class)) {
+                            Stash.asMap().put(field.getAnnotation(ApiRequestParam.class).title(), value);
+                        } else {
+                            log.error("The field annotated by @PutInStash does not annotated by @ApiRequestParam");
+                        }
                         break;
                 }
             }
@@ -324,7 +334,8 @@ public abstract class ApiEntry {
     /**
      * Get and fill api entry headers
      *
-     * @throws ru.sbtqa.tag.apifactory.exception.ApiException if one of headers is not available
+     * @throws ru.sbtqa.tag.apifactory.exception.ApiException if one of headers
+     * is not available
      */
     private void setHeaders() throws ApiException {
         List<Field> fieldList = FieldUtilsExt.getDeclaredFieldsWithInheritance(this.getClass());
@@ -345,15 +356,17 @@ public abstract class ApiEntry {
     /**
      * Get request body. Get request body template from resources
      *
-     * @throws ru.sbtqa.tag.apifactory.exception.ApiException if template file doesn't exist or not available
+     * @throws ru.sbtqa.tag.apifactory.exception.ApiException if template file
+     * doesn't exist or not available
      */
     public void setBody() throws ApiException {
         if (!"".equals(template)) {
             //get body template from resources
             String templatePath = Props.get("api.template.path", "");
+            String encoding = Props.get("api.encoding");
             String templateFullPath = templatePath + template;
             try {
-                body = IOUtils.toString(getClass().getClassLoader().getResourceAsStream(templateFullPath)).replace("\uFEFF", "");
+                body = IOUtils.toString(getClass().getClassLoader().getResourceAsStream(templateFullPath), encoding).replace("\uFEFF", "");
             } catch (NullPointerException ex) {
                 throw new ApiEntryInitializationException("Can't find template file by path " + templateFullPath, ex);
             } catch (IOException ex) {
@@ -361,8 +374,8 @@ public abstract class ApiEntry {
             }
 
             //replace %parameter on parameter value
-            parameters.entrySet().forEach((parameter) -> {
-                String value = (null != parameter.getValue()) ? (String) parameter.getValue() : "";
+            parameters.entrySet().forEach(parameter -> {
+                String value = (null != parameter.getValue()) ? parameter.getValue() : "";
                 body = body.replaceAll("%" + parameter.getKey(), value);
             });
         }
