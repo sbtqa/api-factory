@@ -124,7 +124,7 @@ public class RestEntityImpl extends AbstractRestEntity implements Rest {
                         .collect(Collectors.toCollection(new Supplier<List<NameValuePair>>() {
                             @Override
                             public List<NameValuePair> get() {
-                                return new ArrayList<NameValuePair>();
+                                return new ArrayList<>();
                             }
                         }));
                 if (!postParams.isEmpty()) {
