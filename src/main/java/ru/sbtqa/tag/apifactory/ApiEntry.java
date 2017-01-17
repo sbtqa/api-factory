@@ -10,6 +10,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.io.IOUtils;
@@ -28,7 +30,7 @@ import ru.sbtqa.tag.apifactory.repositories.Bullet;
 import ru.sbtqa.tag.apifactory.rest.Rest;
 import ru.sbtqa.tag.apifactory.soap.Soap;
 import ru.sbtqa.tag.datajack.Stash;
-import ru.sbtqa.tag.qautils.parsers.ParserItem;
+import ru.sbtqa.tag.parsers.core.ParserItem;
 import ru.sbtqa.tag.qautils.properties.Props;
 import ru.sbtqa.tag.qautils.reflect.FieldUtilsExt;
 
@@ -40,7 +42,7 @@ import ru.sbtqa.tag.qautils.reflect.FieldUtilsExt;
  */
 public abstract class ApiEntry {
 
-    private static final Logger log = LoggerFactory.getLogger(ApiEntry.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ApiEntry.class);
 
     private String requestPath = this.getClass().getAnnotation(ApiAction.class).path();
     private final Map<String, String> headers = new HashMap<>();
@@ -60,8 +62,8 @@ public abstract class ApiEntry {
         for (Field field : fieldList) {
             for (Annotation annotation : field.getAnnotations()) {
                 if (annotation instanceof ApiRequestParam
-                      && ((ApiRequestParam) annotation).title().equals(title)
-                      && value != null && !value.isEmpty()) {
+                        && ((ApiRequestParam) annotation).title().equals(title)
+                        && value != null && !value.isEmpty()) {
                     field.setAccessible(true);
                     try {
                         field.set(this, value);
@@ -105,11 +107,14 @@ public abstract class ApiEntry {
      * @param params the list of parameters
      */
     public void fillParams(Map<String, String> params) {
-        params.forEach((k, v) -> {
-            try {
-                setParamValueByTitle(k, v);
-            } catch (Exception e) {
-                log.error("Failed to set params value by title", e);
+        params.forEach(new BiConsumer<String, String>() {
+            @Override
+            public void accept(String k, String v) {
+                try {
+                    setParamValueByTitle(k, v);
+                } catch (ApiException e) {
+                    LOG.error("Failed to set params value by title", e);
+                }
             }
         });
     }
@@ -127,8 +132,11 @@ public abstract class ApiEntry {
         setBody();
 
         //if api action path contains parameters like '%parameter' replace it with it value
-        parameters.entrySet().stream().forEach(parameter -> {
-            requestPath = requestPath.replaceAll("%" + parameter.getKey(), (String) parameter.getValue());
+        parameters.entrySet().stream().forEach(new Consumer<Map.Entry<String, String>>() {
+            @Override
+            public void accept(Map.Entry<String, String> parameter) {
+                requestPath = requestPath.replaceAll("%" + parameter.getKey(), (String) parameter.getValue());
+            }
         });
     }
 
@@ -199,7 +207,7 @@ public abstract class ApiEntry {
                     throw new UnsupportedOperationException("Request method " + requestMethod + " is not support");
             }
         } catch (InstantiationException | IllegalAccessException ex) {
-            log.error("Error with fire method implementation generate", ex);
+            LOG.error("Error with fire method implementation generate", ex);
         }
 
         return response;
@@ -259,7 +267,7 @@ public abstract class ApiEntry {
         Method[] methods = this.getClass().getMethods();
         for (Method method : methods) {
             if (null != method.getAnnotation(ApiValidationRule.class)
-                  && method.getAnnotation(ApiValidationRule.class).title().equals(title)) {
+                    && method.getAnnotation(ApiValidationRule.class).title().equals(title)) {
                 try {
                     method.invoke(this, params);
                 } catch (InvocationTargetException | IllegalAccessException | IllegalArgumentException e) {
@@ -312,7 +320,7 @@ public abstract class ApiEntry {
                         if (null != field.getAnnotation(ApiRequestParam.class)) {
                             Stash.asMap().put(field.getAnnotation(ApiRequestParam.class).title(), value);
                         } else {
-                            log.error("The field annotated by @PutInStash does not annotated by @ApiRequestParam");
+                            LOG.error("The field annotated by @PutInStash does not annotated by @ApiRequestParam");
                         }
                         break;
                 }
@@ -374,9 +382,12 @@ public abstract class ApiEntry {
             }
 
             //replace %parameter on parameter value
-            parameters.entrySet().forEach(parameter -> {
-                String value = (null != parameter.getValue()) ? parameter.getValue() : "";
-                body = body.replaceAll("%" + parameter.getKey(), value);
+            parameters.entrySet().forEach(new Consumer<Map.Entry<String, String>>() {
+                @Override
+                public void accept(Map.Entry<String, String> parameter) {
+                    String value = (null != parameter.getValue()) ? parameter.getValue() : "";
+                    body = body.replaceAll("%" + parameter.getKey(), value);
+                }
             });
         }
     }
@@ -411,7 +422,7 @@ public abstract class ApiEntry {
                         } catch (InstantiationException | IllegalAccessException | NoSuchMethodException | SecurityException | InvocationTargetException ex) {
                             throw new ApiEntryInitializationException("Could not initialize parser callback", ex);
                         } catch (NoSuchElementException e) {
-                            log.debug("No such element in callback", e);
+                            LOG.debug("No such element in callback", e);
                             if (field.getAnnotation(DependentResponseParam.class).necessity()) {
                                 throw new NoSuchElementException(e.getMessage());
                             }

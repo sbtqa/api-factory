@@ -27,10 +27,10 @@ import ru.sbtqa.tag.qautils.properties.Props;
  */
 public class SoapImpl implements Soap {
 
-    private static final Logger log = LoggerFactory.getLogger(SoapImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(SoapImpl.class);
      
     @Override
-    public Bullet send(String url, Map<String, String> headers, Object body, Proxy proxy) throws ApiSoapException {
+    public Bullet send(String url, final Map<String, String> headers, Object body, final Proxy proxy) throws ApiSoapException {
         SOAPMessage response = null;
         
         try {
@@ -71,8 +71,8 @@ public class SoapImpl implements Soap {
                 response = connection.call(message, endpoint);
                 connection.close();
                 response.setProperty(SOAPMessage.CHARACTER_SET_ENCODING, encoding);
-            } catch (Exception e) {
-                log.error("First message send failed", e);
+            } catch (SOAPException e) {
+                LOG.error("First message send failed", e);
                 response = connection.call(message, endpoint);
                 connection.close();
                 response.setProperty(SOAPMessage.CHARACTER_SET_ENCODING, encoding);
@@ -87,7 +87,7 @@ public class SoapImpl implements Soap {
             String responseBody = new String(out.toByteArray());
             return new Bullet(null, responseBody);
         } catch (SOAPException | IOException ex) {
-            log.error("There are a problem with get response soap body", ex);
+            LOG.error("There are a problem with get response soap body", ex);
         }
         return null;
     }
