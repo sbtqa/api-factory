@@ -5,10 +5,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.Supplier;
-import java.util.stream.Collectors;
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
@@ -47,14 +43,10 @@ public class RestEntityImpl extends AbstractRestEntity implements Rest {
             LOG.info("Request url {}", url);
             final HttpGet get = new HttpGet(url);
 
-            headers.entrySet()
-                    .stream()
-                    .forEach(new Consumer<Map.Entry<String, String>>() {
-                        @Override
-                        public void accept(Map.Entry<String, String> h) {
-                            get.setHeader(h.getKey(), h.getValue());
-                        }
-                    });
+            for (Map.Entry<String,String> h: headers.entrySet()) {
+                get.setHeader(h.getKey(), h.getValue());
+            }
+
             LOG.info("Request headers {}", headers);
 
             HttpResponse response = null;
@@ -101,32 +93,20 @@ public class RestEntityImpl extends AbstractRestEntity implements Rest {
             LOG.info("Sending 'POST' request to URL : {}", url);
             final HttpPost post = new HttpPost(url);
 
-            headers.entrySet()
-                    .stream()
-                    .forEach(new Consumer<Map.Entry<String, String>>() {
-                        @Override
-                        public void accept(Map.Entry<String, String> h) {
-                            post.setHeader(h.getKey(), h.getValue());
-                        }
-                    });
+            for (Map.Entry<String,String> h: headers.entrySet()) {
+                post.setHeader(h.getKey(), h.getValue());
+            }
+
             LOG.info("Headers are: {}", headers);
 
-            List<NameValuePair> postParams;
+            List<NameValuePair> postParams = new ArrayList<>();
             if (body instanceof Map) {
                 Map<String, String> params = (Map<String, String>) body;
-                postParams = params.entrySet()
-                        .stream().map(new Function<Map.Entry<String, String>, BasicNameValuePair>() {
-                            @Override
-                            public BasicNameValuePair apply(Map.Entry<String, String> e) {
-                                return new BasicNameValuePair(e.getKey(), e.getValue());
-                            }
-                        })
-                        .collect(Collectors.toCollection(new Supplier<List<NameValuePair>>() {
-                            @Override
-                            public List<NameValuePair> get() {
-                                return new ArrayList<>();
-                            }
-                        }));
+
+                for (Map.Entry<String,String> e: params.entrySet()) {
+                    postParams.add(new BasicNameValuePair(e.getKey(), e.getValue()));
+                }
+
                 if (!postParams.isEmpty()) {
                     post.setEntity(new UrlEncodedFormEntity(postParams));
                 }

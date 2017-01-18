@@ -10,8 +10,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.io.IOUtils;
@@ -107,16 +105,14 @@ public abstract class ApiEntry {
      * @param params the list of parameters
      */
     public void fillParams(Map<String, String> params) {
-        params.forEach(new BiConsumer<String, String>() {
-            @Override
-            public void accept(String k, String v) {
-                try {
-                    setParamValueByTitle(k, v);
-                } catch (ApiException e) {
-                    LOG.error("Failed to set params value by title", e);
-                }
+
+        for (Map.Entry<String,String> p: params.entrySet()) {
+            try {
+                setParamValueByTitle(p.getKey(), p.getValue());
+            } catch (ApiException e) {
+                LOG.error("Failed to set params value by title", e);
             }
-        });
+        }
     }
 
     /**
@@ -132,12 +128,9 @@ public abstract class ApiEntry {
         setBody();
 
         //if api action path contains parameters like '%parameter' replace it with it value
-        parameters.entrySet().stream().forEach(new Consumer<Map.Entry<String, String>>() {
-            @Override
-            public void accept(Map.Entry<String, String> parameter) {
-                requestPath = requestPath.replaceAll("%" + parameter.getKey(), (String) parameter.getValue());
-            }
-        });
+        for (Map.Entry<String,String> parameter: parameters.entrySet()) {
+            requestPath = requestPath.replaceAll("%" + parameter.getKey(), parameter.getValue());
+        }
     }
 
     /**
@@ -382,13 +375,10 @@ public abstract class ApiEntry {
             }
 
             //replace %parameter on parameter value
-            parameters.entrySet().forEach(new Consumer<Map.Entry<String, String>>() {
-                @Override
-                public void accept(Map.Entry<String, String> parameter) {
-                    String value = (null != parameter.getValue()) ? parameter.getValue() : "";
-                    body = body.replaceAll("%" + parameter.getKey(), value);
-                }
-            });
+            for (Map.Entry<String,String> parameter: parameters.entrySet()) {
+                String value = (null != parameter.getValue()) ? parameter.getValue() : "";
+                body = body.replaceAll("%" + parameter.getKey(), value);
+            }
         }
     }
 
