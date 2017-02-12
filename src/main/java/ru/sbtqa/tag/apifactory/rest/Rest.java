@@ -13,15 +13,9 @@ public interface Rest {
 
     Object post(String url, Map<String, String> headers, Object body) throws ApiRestException;
 
-    default Object put(String url, Map<String, String> headers, Object body) throws ApiRestException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+    Object put(String url, Map<String, String> headers, Object body) throws ApiRestException;
 
-    default Object patch(String url, Map<String, String> headers, Object body) throws ApiRestException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+    Object patch(String url, Map<String, String> headers, Object body) throws ApiRestException;
 
-    default Object delete(String url, Map<String, String> headers) throws ApiRestException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+    Object delete(String url, Map<String, String> headers) throws ApiRestException;
 }

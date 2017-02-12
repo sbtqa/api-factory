@@ -1,10 +1,10 @@
 package ru.sbtqa.tag.apifactory.rest;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
@@ -30,9 +30,9 @@ import ru.sbtqa.tag.qautils.properties.Props;
  *
  *
  */
-public class RestEntityImpl implements Rest {
+public class RestEntityImpl extends AbstractRestEntity implements Rest {
 
-    private static final Logger log = LoggerFactory.getLogger(RestEntityImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(RestEntityImpl.class);
 
     @Override
     public Bullet get(String url, Map<String, String> headers) throws ApiRestException {
@@ -40,19 +40,20 @@ public class RestEntityImpl implements Rest {
         Bullet bullet = null;
 
         try {
-            log.info("Request url {}", url);
-            HttpGet get = new HttpGet(url);
+            LOG.info("Request url {}", url);
+            final HttpGet get = new HttpGet(url);
 
-            headers.entrySet()
-                  .stream()
-                  .forEach(h -> get.setHeader(h.getKey(), h.getValue()));
-            log.info("Request headers {}", headers);
+            for (Map.Entry<String,String> h: headers.entrySet()) {
+                get.setHeader(h.getKey(), h.getValue());
+            }
+
+            LOG.info("Request headers {}", headers);
 
             HttpResponse response = null;
             try {
                 response = client.execute(get);
             } catch (IOException ex) {
-                log.error("Ошибка при выполнении запроса", ex);
+                LOG.error("Ошибка при выполнении запроса", ex);
                 throw new AutotestError(ex);
 
             }
@@ -67,14 +68,14 @@ public class RestEntityImpl implements Rest {
             }
 
             if (response.getStatusLine().getStatusCode() != 200) {
-                log.error("Статус ответа '{}'", response.getStatusLine().getReasonPhrase());
+                LOG.error("Статус ответа '{}'", response.getStatusLine().getReasonPhrase());
                 throw new AutotestError("Статус ответа не равен 200");
             }
 
             try {
                 bullet = new Bullet(headersResponse, EntityUtils.toString(response.getEntity()));
             } catch (IOException | ParseException ex) {
-                log.error("Error in response body get", ex);
+                LOG.error("Error in response body get", ex);
             }
 
         } finally {
@@ -87,27 +88,29 @@ public class RestEntityImpl implements Rest {
     @Override
     public Bullet post(String url, Map<String, String> headers, Object body) throws ApiRestException {
         HttpClient client = HttpClients.createDefault();
-        
+
         try {
-            log.info("Sending 'POST' request to URL : {}", url);
-            HttpPost post = new HttpPost(url);
+            LOG.info("Sending 'POST' request to URL : {}", url);
+            final HttpPost post = new HttpPost(url);
 
-            headers.entrySet()
-                  .stream()
-                  .forEach(h -> post.setHeader(h.getKey(), h.getValue()));
-            log.info("Headers are: {}", headers);
+            for (Map.Entry<String,String> h: headers.entrySet()) {
+                post.setHeader(h.getKey(), h.getValue());
+            }
 
-            List<NameValuePair> postParams;
+            LOG.info("Headers are: {}", headers);
+
+            List<NameValuePair> postParams = new ArrayList<>();
             if (body instanceof Map) {
                 Map<String, String> params = (Map<String, String>) body;
-                postParams = params.entrySet()
-                      .stream()
-                      .map(e -> new BasicNameValuePair(e.getKey(), e.getValue()))
-                      .collect(Collectors.toList());
+
+                for (Map.Entry<String,String> e: params.entrySet()) {
+                    postParams.add(new BasicNameValuePair(e.getKey(), e.getValue()));
+                }
+
                 if (!postParams.isEmpty()) {
                     post.setEntity(new UrlEncodedFormEntity(postParams));
                 }
-                log.info("Body (form-data) is: {}", body);
+                LOG.info("Body (form-data) is: {}", body);
             } else if (body instanceof String) {
                 post.setEntity(new StringEntity((String) body, Props.get("api.encoding")));
             }
@@ -115,7 +118,7 @@ public class RestEntityImpl implements Rest {
             HttpResponse response = client.execute(post);
 
             if (response.getStatusLine().getStatusCode() != 200) {
-                log.error("Статус ответа '{}'", response.getStatusLine().getReasonPhrase());
+                LOG.error("Статус ответа '{}'", response.getStatusLine().getReasonPhrase());
                 throw new AutotestError("Статус ответа не равен 200");
             }
 
@@ -131,7 +134,7 @@ public class RestEntityImpl implements Rest {
 
             return new Bullet(headersResponse, EntityUtils.toString(response.getEntity()));
         } catch (IOException ex) {
-            log.error("Failed to get response", ex);
+            LOG.error("Failed to get response", ex);
         } finally {
             HttpClientUtils.closeQuietly(client);
         }

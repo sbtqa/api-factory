@@ -15,7 +15,7 @@ import ru.sbtqa.tag.apifactory.rest.Rest;
 import ru.sbtqa.tag.apifactory.rest.RestRawImpl;
 import ru.sbtqa.tag.apifactory.soap.Soap;
 import ru.sbtqa.tag.apifactory.soap.SoapImpl;
-import ru.sbtqa.tag.qautils.parsers.interfaces.callback.ParserCallback;
+import ru.sbtqa.tag.parsers.core.ParserCallback;
 
 /**
  * <p>
