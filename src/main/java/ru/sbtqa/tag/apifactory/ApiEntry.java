@@ -159,6 +159,7 @@ public abstract class ApiEntry {
         String templateName = this.getClass().getAnnotation(ApiAction.class).template();
 
         Bullet response = null;
+        Bullet request = null;
         Class restImpl = ApiFactory.getApiFactory().getRest();
         Class soapImpl = ApiFactory.getApiFactory().getSoap();
         try {
@@ -176,25 +177,31 @@ public abstract class ApiEntry {
             switch (requestMethod) {
                 case "get":
                     response = (Bullet) rest.get(url, hdrs);
+                    ApiFactory.getApiFactory().addRequestHeadersToRepository(this.getClass(), hdrs);
                     break;
                 case "post":
                     response = (Bullet) rest.post(url, hdrs, bd);
-                    ApiFactory.getApiFactory().getRequestRepository().put(this.getClass(), bd);
+                    request = new Bullet(hdrs, bd.toString());;
+                    ApiFactory.getApiFactory().addRequestToRepository(this.getClass(), request);
                     break;
                 case "put":
                     response = (Bullet) rest.put(url, hdrs, bd);
-                    ApiFactory.getApiFactory().getRequestRepository().put(this.getClass(), bd);
+                    request = new Bullet(hdrs, bd.toString());;
+                    ApiFactory.getApiFactory().addRequestToRepository(this.getClass(), request);
                     break;
                 case "patch":
                     response = (Bullet) rest.patch(url, hdrs, bd);
-                    ApiFactory.getApiFactory().getRequestRepository().put(this.getClass(), bd);
+                    request = new Bullet(hdrs, bd.toString());;
+                    ApiFactory.getApiFactory().addRequestToRepository(this.getClass(), request);
                     break;
                 case "delete":
                     response = (Bullet) rest.delete(url, hdrs);
+                    ApiFactory.getApiFactory().addRequestHeadersToRepository(this.getClass(), hdrs);
                     break;
                 case "soap":
                     response = (Bullet) soap.send(url, hdrs, bd, Proxy.NO_PROXY);
-                    ApiFactory.getApiFactory().getRequestRepository().put(this.getClass(), bd);
+                    request = new Bullet(hdrs, bd.toString());;
+                    ApiFactory.getApiFactory().addRequestToRepository(this.getClass(), request);
                     break;
                 default:
                     throw new UnsupportedOperationException("Request method " + requestMethod + " is not support");

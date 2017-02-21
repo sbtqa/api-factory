@@ -12,9 +12,9 @@ import ru.sbtqa.tag.apifactory.ApiEntry;
  *
  *
  */
-public class ResponseRepository {
+public class Repository {
 
-    private static final Logger log = LoggerFactory.getLogger(ResponseRepository.class);
+    private static final Logger log = LoggerFactory.getLogger(Repository.class);
 
     private final Map<Class<? extends ApiEntry>, Bullet> instance = new LinkedHashMap<>();
 
