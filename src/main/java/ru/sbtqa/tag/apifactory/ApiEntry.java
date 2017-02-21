@@ -181,17 +181,17 @@ public abstract class ApiEntry {
                     break;
                 case "post":
                     response = (Bullet) rest.post(url, hdrs, bd);
-                    request = new Bullet(hdrs, bd.toString());;
+                    request = new Bullet(hdrs, bd.toString());
                     ApiFactory.getApiFactory().addRequestToRepository(this.getClass(), request);
                     break;
                 case "put":
                     response = (Bullet) rest.put(url, hdrs, bd);
-                    request = new Bullet(hdrs, bd.toString());;
+                    request = new Bullet(hdrs, bd.toString());
                     ApiFactory.getApiFactory().addRequestToRepository(this.getClass(), request);
                     break;
                 case "patch":
                     response = (Bullet) rest.patch(url, hdrs, bd);
-                    request = new Bullet(hdrs, bd.toString());;
+                    request = new Bullet(hdrs, bd.toString());
                     ApiFactory.getApiFactory().addRequestToRepository(this.getClass(), request);
                     break;
                 case "delete":
@@ -200,7 +200,7 @@ public abstract class ApiEntry {
                     break;
                 case "soap":
                     response = (Bullet) soap.send(url, hdrs, bd, Proxy.NO_PROXY);
-                    request = new Bullet(hdrs, bd.toString());;
+                    request = new Bullet(hdrs, bd.toString());
                     ApiFactory.getApiFactory().addRequestToRepository(this.getClass(), request);
                     break;
                 default:
