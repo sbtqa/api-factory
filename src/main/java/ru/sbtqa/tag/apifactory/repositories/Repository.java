@@ -7,7 +7,7 @@ import org.slf4j.LoggerFactory;
 import ru.sbtqa.tag.apifactory.ApiEntry;
 
 /**
- * Response repository. Contains responses as pair of ApiRequestEntry.class and
+ * Response or request repository. Contains as pair of ApiEntry.class and
  * {@link ru.sbtqa.tag.apifactory.repositories.Bullet} object.
  *
  *
@@ -19,7 +19,7 @@ public class Repository {
     private final Map<Class<? extends ApiEntry>, Bullet> instance = new LinkedHashMap<>();
 
     /**
-     * Get headers pairs name-value by ApiRequestEntry.class
+     * Get headers pairs name-value by ApiEntry.class
      *
      * @param apiEntry api object class of request
      * @return headers as Map
@@ -29,7 +29,7 @@ public class Repository {
     }
 
     /**
-     * Get header value by ApiRequestEntry.class and header name
+     * Get header value by ApiEntry.class and header name
      *
      * @param apiEntry api object class of request
      * @param headerName header name
@@ -40,7 +40,7 @@ public class Repository {
     }
 
     /**
-     * Get body as String by ApiRequestEntry.class
+     * Get body as String by ApiEntry.class
      *
      * @param apiEntry api object class of request
      * @return {@link java.lang.String} body
@@ -50,7 +50,7 @@ public class Repository {
     }
 
     /**
-     * Add body by ApiRequestEntry.class
+     * Add body by ApiEntry.class
      *
      * @param apiEntry api object class of request
      * @param body {@link java.lang.String} body
@@ -69,7 +69,7 @@ public class Repository {
     }
 
     /**
-     * Add headers by ApiRequestEntry.class
+     * Add headers by ApiEntry.class
      *
      * @param apiEntry api object class of request
      * @param headers {@link java.util.Map} headers
@@ -88,15 +88,15 @@ public class Repository {
     }
 
     /**
-     * Get last response in repository
+     * Get last in repository
      *
      * @return {@link ru.sbtqa.tag.apifactory.repositories.Bullet} object
      */
-    public Bullet getLastResponseInRepository() {
-        Bullet response = null;
+    public Bullet getLastInRepository() {
+        Bullet item = null;
         for (Map.Entry<Class<? extends ApiEntry>, Bullet> entry : instance.entrySet()) {
-            response = entry.getValue();
+            item = entry.getValue();
         }
-        return response;
+        return item;
     }
 }
