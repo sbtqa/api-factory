@@ -105,11 +105,11 @@ public class Repository {
      * @return {@link ru.sbtqa.tag.apifactory.repositories.Bullet} object
      */
     public Bullet getLastInRepository() {
-        Bullet item = null;
+        Bullet bullet = null;
         for (Map.Entry<Class<? extends ApiEntry>, Bullet> entry : instance.entrySet()) {
-            item = entry.getValue();
+            bullet = entry.getValue();
         }
-        return item;
+        return bullet;
     }
     
     /**
