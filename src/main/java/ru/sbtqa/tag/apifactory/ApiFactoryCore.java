@@ -2,7 +2,6 @@ package ru.sbtqa.tag.apifactory;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 import org.reflections.Reflections;
@@ -10,7 +9,8 @@ import ru.sbtqa.tag.apifactory.annotation.ApiAction;
 import ru.sbtqa.tag.apifactory.exception.ApiEntryInitializationException;
 import ru.sbtqa.tag.apifactory.exception.ApiException;
 import ru.sbtqa.tag.apifactory.repositories.Bullet;
-import ru.sbtqa.tag.apifactory.repositories.ResponseRepository;
+import ru.sbtqa.tag.apifactory.repositories.Repository;
+import ru.sbtqa.tag.apifactory.repositories.RepositoryType;
 import ru.sbtqa.tag.apifactory.rest.Rest;
 import ru.sbtqa.tag.apifactory.rest.RestRawImpl;
 import ru.sbtqa.tag.apifactory.soap.Soap;
@@ -33,8 +33,8 @@ public class ApiFactoryCore {
     private Class<? extends ParserCallback> parser;
     private Class<? extends Rest> rest = RestRawImpl.class;
     private Class<? extends Soap> soap = SoapImpl.class;
-    private ResponseRepository responseRepository;
-    private final Map<Class<? extends ApiEntry>, Object> requestRepository = new LinkedHashMap<>();
+    private Repository responseRepository;
+    private Repository requestRepository;
 
     /**
      * Constructor for ApiFactory.
@@ -43,7 +43,8 @@ public class ApiFactoryCore {
      */
     public ApiFactoryCore(String pagesPackage) {
         this.entriesPackage = pagesPackage;
-        this.responseRepository = new ResponseRepository();
+        this.responseRepository = new Repository(RepositoryType.RESPONSE);
+        this.requestRepository = new Repository(RepositoryType.REQUEST);
     }
 
     /**
@@ -147,7 +148,7 @@ public class ApiFactoryCore {
     /**
      * @return the responseRepository
      */
-    public ResponseRepository getResponseRepository() {
+    public Repository getResponseRepository() {
         return responseRepository;
     }
 
@@ -185,7 +186,7 @@ public class ApiFactoryCore {
     /**
      * @return the requestRepository
      */
-    public Map<Class<? extends ApiEntry>, Object> getRequestRepository() {
+    public Repository getRequestRepository() {
         return requestRepository;
     }
 
@@ -193,10 +194,32 @@ public class ApiFactoryCore {
      * Add request to repository
      *
      * @param clazz the api entry
-     * @param request the request
+     * @param bullet the {@link ru.sbtqa.tag.apifactory.repositories.Bullet}
+     * request
      */
-    public void addRequestToRepository(Class<? extends ApiEntry> clazz, Object request) {
-        this.requestRepository.put(clazz, request);
+    public void addRequestToRepository(Class<? extends ApiEntry> clazz, Bullet bullet) {
+        this.requestRepository.addHeaders(clazz, bullet.getHeaders());
+        this.requestRepository.addBody(clazz, bullet.getBody());
+    }
+
+    /**
+     * Add request body to repository
+     *
+     * @param clazz the api entry
+     * @param body the body of request
+     */
+    public void addRequestBodyToRepository(Class<? extends ApiEntry> clazz, String body) {
+        this.requestRepository.addBody(clazz, body);
+    }
+
+    /**
+     * Add request headers to repository
+     *
+     * @param clazz the api entry
+     * @param headers the list of headers of request
+     */
+    public void addRequestHeadersToRepository(Class<? extends ApiEntry> clazz, Map<String, String> headers) {
+        this.requestRepository.addHeaders(clazz, headers);
     }
 
     /**

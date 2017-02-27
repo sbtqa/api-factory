@@ -7,19 +7,31 @@ import org.slf4j.LoggerFactory;
 import ru.sbtqa.tag.apifactory.ApiEntry;
 
 /**
- * Response repository. Contains responses as pair of ApiRequestEntry.class and
+ * Response or request repository. Contains as pair of ApiEntry.class and
  * {@link ru.sbtqa.tag.apifactory.repositories.Bullet} object.
  *
  *
  */
-public class ResponseRepository {
+public class Repository {
 
-    private static final Logger log = LoggerFactory.getLogger(ResponseRepository.class);
+    private static final Logger log = LoggerFactory.getLogger(Repository.class);
+    
+    private String repositoryType;
 
     private final Map<Class<? extends ApiEntry>, Bullet> instance = new LinkedHashMap<>();
+    
+    /**
+     * The initialization of a repository of the specified type
+     *
+     * @param repositoryType repository type of the directory
+     * {@link ru.sbtqa.tag.apifactory.repositories.RepositoryType}
+     */
+    public Repository(String repositoryType) {
+        this.repositoryType = repositoryType;
+    }
 
     /**
-     * Get headers pairs name-value by ApiRequestEntry.class
+     * Get headers pairs name-value by ApiEntry.class
      *
      * @param apiEntry api object class of request
      * @return headers as Map
@@ -29,7 +41,7 @@ public class ResponseRepository {
     }
 
     /**
-     * Get header value by ApiRequestEntry.class and header name
+     * Get header value by ApiEntry.class and header name
      *
      * @param apiEntry api object class of request
      * @param headerName header name
@@ -40,7 +52,7 @@ public class ResponseRepository {
     }
 
     /**
-     * Get body as String by ApiRequestEntry.class
+     * Get body as String by ApiEntry.class
      *
      * @param apiEntry api object class of request
      * @return {@link java.lang.String} body
@@ -50,7 +62,7 @@ public class ResponseRepository {
     }
 
     /**
-     * Add body by ApiRequestEntry.class
+     * Add body by ApiEntry.class
      *
      * @param apiEntry api object class of request
      * @param body {@link java.lang.String} body
@@ -65,11 +77,11 @@ public class ResponseRepository {
         bullet.setBody(body);
 
         instance.put(apiEntry, bullet);
-        log.info("Added to repository key {} body {{}}", apiEntry.getName(), body);
+        log.info("Added to " + getType() + " repository key {} body {{}}", apiEntry.getName(), body);
     }
 
     /**
-     * Add headers by ApiRequestEntry.class
+     * Add headers by ApiEntry.class
      *
      * @param apiEntry api object class of request
      * @param headers {@link java.util.Map} headers
@@ -84,19 +96,28 @@ public class ResponseRepository {
         bullet.setHeaders(headers);
 
         instance.put(apiEntry, bullet);
-        log.info("Added to repository key {} headers {}", apiEntry.getName(), headers);
+        log.info("Added to " + getType() + " repository key {} headers {}", apiEntry.getName(), headers);
     }
 
     /**
-     * Get last response in repository
+     * Get last in repository
      *
      * @return {@link ru.sbtqa.tag.apifactory.repositories.Bullet} object
      */
-    public Bullet getLastResponseInRepository() {
-        Bullet response = null;
+    public Bullet getLastInRepository() {
+        Bullet bullet = null;
         for (Map.Entry<Class<? extends ApiEntry>, Bullet> entry : instance.entrySet()) {
-            response = entry.getValue();
+            bullet = entry.getValue();
         }
-        return response;
+        return bullet;
+    }
+    
+    /**
+     * Get repository type as String
+     *
+     * @return {@link java.lang.String} type
+     */
+    public String getType() {
+        return this.repositoryType;
     }
 }
