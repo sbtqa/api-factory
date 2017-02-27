@@ -1,10 +1,15 @@
 package ru.sbtqa.tag.apifactory;
 
+import com.google.common.reflect.ClassPath;
+import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
-import org.reflections.Reflections;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import ru.sbtqa.tag.apifactory.annotation.ApiAction;
 import ru.sbtqa.tag.apifactory.exception.ApiEntryInitializationException;
 import ru.sbtqa.tag.apifactory.exception.ApiException;
@@ -24,6 +29,8 @@ import ru.sbtqa.tag.parsers.core.ParserCallback;
  *
  */
 public class ApiFactoryCore {
+    
+    private static final Logger LOG = LoggerFactory.getLogger(ApiFactoryCore.class);
 
     private String currentEntryTitle;
     private String currentEntryPath;
@@ -77,26 +84,33 @@ public class ApiFactoryCore {
      * @throws ru.sbtqa.tag.apifactory.exception.ApiException if there is an error with parameters initialize
      */
     private ApiEntry getApiEntry(String packageName, String title) throws ApiException {
-        Reflections reflections = new Reflections(packageName);
-        Set<Class<? extends ApiEntry>> allClasses = reflections.getSubTypesOf(ApiEntry.class);
-        for (Class<? extends ApiEntry> entry : allClasses) {
-            //Avoid NPE on not annotated classes
-            if (null == entry.getAnnotation(ApiAction.class)) {
-                continue;
+        ClassLoader loader = Thread.currentThread().getContextClassLoader();
+        final Set<Class<?>> allClasses = new HashSet<>();
+        try {
+            for (ClassPath.ClassInfo info: ClassPath.from(loader).getAllClasses()) {
+                if (info.getName().startsWith(packageName + ".")) {
+                    allClasses.add(info.load());
+                }
             }
-            String entryTitle = entry.getAnnotation(ApiAction.class).title();
-            String entryPath = entry.getAnnotation(ApiAction.class).path();
-            if (entryTitle.equals(title)) {
-                try {
-                    @SuppressWarnings("unchecked")
-                    Constructor<ApiEntry> c = (Constructor<ApiEntry>) entry.getConstructor();
-                    currentEntry = c.newInstance();
-                    currentEntryTitle = title;
-                    currentEntryPath = entryPath;
-                    return currentEntry;
-                } catch (NoSuchMethodException | SecurityException | InstantiationException
-                        | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
-                    throw new ApiEntryInitializationException("Can't initialize current entry parameters", ex);
+        } catch (IOException ex) {
+            LOG.warn("Failed to shape class info set", ex);
+        }
+
+        for (Class<?> entry : allClasses) {
+            if (null != entry.getAnnotation(ApiAction.class)) {
+                String entryTitle = entry.getAnnotation(ApiAction.class).title();
+                String entryPath = entry.getAnnotation(ApiAction.class).path();
+                if (entryTitle != null && entryTitle.equals(title)) {
+                    try {
+                        Constructor<ApiEntry> c = (Constructor<ApiEntry>) entry.getConstructor();
+                        currentEntry = c.newInstance();
+                        currentEntryTitle = title;
+                        currentEntryPath = entryPath;
+                        return currentEntry;
+                    } catch (NoSuchMethodException | SecurityException | InstantiationException
+                            | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
+                        throw new ApiEntryInitializationException("Can't initialize current entry parameters", ex);
+                    }
                 }
             }
         }
