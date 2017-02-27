@@ -15,8 +15,20 @@ import ru.sbtqa.tag.apifactory.ApiEntry;
 public class Repository {
 
     private static final Logger log = LoggerFactory.getLogger(Repository.class);
+    
+    private String repositoryType;
 
     private final Map<Class<? extends ApiEntry>, Bullet> instance = new LinkedHashMap<>();
+    
+    /**
+     * The initialization of a repository of the specified type
+     *
+     * @param repositoryType repository type of the directory
+     * {@link ru.sbtqa.tag.apifactory.repositories.RepositoryType}
+     */
+    public Repository(String repositoryType) {
+        this.repositoryType = repositoryType;
+    }
 
     /**
      * Get headers pairs name-value by ApiEntry.class
@@ -65,7 +77,7 @@ public class Repository {
         bullet.setBody(body);
 
         instance.put(apiEntry, bullet);
-        log.info("Added to repository key {} body {{}}", apiEntry.getName(), body);
+        log.info("Added to " + getType() + " repository key {} body {{}}", apiEntry.getName(), body);
     }
 
     /**
@@ -84,7 +96,7 @@ public class Repository {
         bullet.setHeaders(headers);
 
         instance.put(apiEntry, bullet);
-        log.info("Added to repository key {} headers {}", apiEntry.getName(), headers);
+        log.info("Added to " + getType() + " repository key {} headers {}", apiEntry.getName(), headers);
     }
 
     /**
@@ -98,5 +110,14 @@ public class Repository {
             item = entry.getValue();
         }
         return item;
+    }
+    
+    /**
+     * Get repository type as String
+     *
+     * @return {@link java.lang.String} type
+     */
+    public String getType() {
+        return this.repositoryType;
     }
 }

@@ -10,6 +10,7 @@ import ru.sbtqa.tag.apifactory.exception.ApiEntryInitializationException;
 import ru.sbtqa.tag.apifactory.exception.ApiException;
 import ru.sbtqa.tag.apifactory.repositories.Bullet;
 import ru.sbtqa.tag.apifactory.repositories.Repository;
+import ru.sbtqa.tag.apifactory.repositories.RepositoryType;
 import ru.sbtqa.tag.apifactory.rest.Rest;
 import ru.sbtqa.tag.apifactory.rest.RestRawImpl;
 import ru.sbtqa.tag.apifactory.soap.Soap;
@@ -42,8 +43,8 @@ public class ApiFactoryCore {
      */
     public ApiFactoryCore(String pagesPackage) {
         this.entriesPackage = pagesPackage;
-        this.responseRepository = new Repository();
-        this.requestRepository = new Repository();
+        this.responseRepository = new Repository(RepositoryType.RESPONSE);
+        this.requestRepository = new Repository(RepositoryType.REQUEST);
     }
 
     /**

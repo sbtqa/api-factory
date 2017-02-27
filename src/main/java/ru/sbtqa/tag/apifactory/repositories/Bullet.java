@@ -18,7 +18,7 @@ public class Bullet {
     private String body = null;
 
     public Bullet() {
-        log.info("Created empty bullet");
+        log.debug("Created empty bullet");
     }
 
     public Bullet(Map<String, String> headers, String body) {
