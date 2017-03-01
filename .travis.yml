@@ -1,6 +1,10 @@
 language: java
 addons:
-  sonarqube: true
+  sonarqube: 
+    token:
+      secure: o2QhHFOGZwrQeZZm1vopeeSXZHgUJSvub+ASgpnnmTNLGMPFnzU3Iv8zYGFUOrGyXd4yA9otxyskO0etR0KSQKM9zLvEZ79Z52gmcOwRfXijkDzXGktGRH5pC+M2FbGqWO2XMXykaw1i6+oSYbnTeQ1zXtQlICqy+Q09Azk0pPGatUjpeagXuwnCft9Kzo9b7T+lyQUKb1ZPVJRKHprQcA7Jtn/c//GUJ3A2kpnHiy70lzQdnheFZg/wkHb3vbAxCAqRmNr0n1dVRA6jabKvko/gEyfx4Q/3uzm8xoiMb5lrh/KlYQXgCkG8Zt5EfhQEbwWAnFuhjhwPpKHJqLonABAg4agQu8UVOxFYzAhG+dUoVRJKFH0m2SLqluw+61aT83KOFgztTgdk2QTmlHbQKDcf0hOsfKU6lfn+mmuEhSbph5tMRfYxCmdG0qajXyFGxytZYKjmU3jPZPSVD07LbNUR7qYTl+2Zn00SJXxjUbxd0rmYYuuv2Ds+Yjr+CibP+M/+0kSQovamF0n1hy65ILHlSlKGWOLF2eLXXs/SlgX21qKkRFxIiHhSLpZCorLtaFC24uhLonCPg3zbTAE+9eY234KGDwOMhUarjIkAs82R9YN1Ie8p6WkqcpXYvntivIuhWoIKe70guF/qQsBLuYcdoE9/Vl0LGlfTnaz7l/0=
+    github_token:
+      secure: hMoZvDiR+eGiI/d23OLVUyA4Owk1lmB8Zi2N8Vl2G2uZnDPwY2VdpCalJS0rVQuI6PWUxBZVESoSvVoM3yGH1qsPCHg/EgcawGiHqklg9hcybgwf+UcCR90y7LiM4VNuuPVRjPsz8lRiVVGV7FJD88pqG7oB5aYJQX/9nUZqNXNI+ERLVvK0KjlQ+nytN+xrmmPZBBkECCK1QQvIAlGw4UATwAj+IJ25bdnfYin53S+fXXJWleOtJpWqOkkv9NRPlukWFNEc7nWhrUbni5PP1RHN3NmWT9lLdSQSOeAXUMOKYFCu9bfKvm/N3RtJGfrur/cAWlO3q+dRanG0QHkUJm72tT3ssBKBFxLV7K22sW9GxHMsbqsh1phA31PqDmGTl1KQ7dAISwNA+otKjR/Bt+Oi4iDXt+5Cl4HrKkO2OkFy2pFzmnGIhKPTVKqjFgApbT8uIbuF1sYQTcAyKaWrX7isscGCQ62lh3PcfuZRZ4E/HnCwML+lJQLT7ciGlx+iMR6QlDqVmG0puSL0imIFeDSEdOSaiPGpLHmTsBMBH3jCo/eZFTOonFTAV3Gq0VXwS7yIg9jzC7BhkhQhEpoYhSnz6XVWLIcCjktu4kVLKMody1n0vZSp5zUAVet9CUTsxutRNUVmA8yb0uRkINWhZUXE+BApiPZsJQvsGWcZhiA=
 jdk:
   - oraclejdk8
 before_install:
@@ -9,7 +13,7 @@ before_install:
 install:
   - mvn --settings .travis/settings.xml clean install -DskipTests=true -Dmaven.javadoc.skip=true -Dgpg.skip -B -V
 script:
-  - mvn --settings .travis/settings.xml org.jacoco:jacoco-maven-plugin:prepare-agent sonar:sonar -Dsonar.login=$SONAR_TOKEN
+  - sonar-scanner
 deploy:
   - provider: script
     script: ".travis/deploy.sh"
@@ -30,6 +34,8 @@ notifications:
   slack:
     rooms:
       - secure: nciRavL0N9af2IySkmXF62jls6bS9F0vAknqIlk38CS9q/HJ88Eqav9DcIxwq9o1Qtd3/JZX7p8QagkT29V0w+xqpNhFAPZ4C51BmG6B6uujFX7K7fE6n4NjEa4pD3OaV2QITZ8D5Xv7SVf8cfVEW0xv7Fggm6zYlVnv5ZUx7dycMLTtkKSbOupVy35zN2Q8S5STpEdnWwyBqOMFOg/oj7ec9vS0i75gojouuaSXyuN/iaa5IFp3QFtFzeDE+MQ4OM6xd72HtjmQji4KwW+JvE9IoVc8/gfXUU/z2OAkd7SQwMXWx2AjNWT9tUncgUrATtuIaSpH6iHMnxTnz/upjJ7MfHNRrkQE7dfWjVOQCebNP5LLa07gUlORtwSzRfcv23zIlNEQkJw32wDhVLpHgmlAHy8yFU+4muRNGdT4Pir2TANlU0jrN/bg/Ht5kVRTyQ15AWjb6Ngw+o8HIimYPloBeELF1qHfxI9XMYt+9vNHPpUboiC9m6ZAiVwhH4ALX6DeGQOkgs0ebgfvgbqvqZCow+nUUVaUuW5/lQLQtS/oEliwuk4wpd92RN4jYHx9ni5YnH7inhbCq5FMwECJn1WJmdtecm5WwovzXMo0v4BFLisVxFpPOmMx/dxDxz5EGYn/O7F927GQiZSoSnEoOg52DwUM7AHSZ043RQojo7U=
+    on_success: change
+    on_failure: always
     template:
       - "Build status: %{message}"
       - "%{repository}#%{build_number} (%{branch} - %{commit} : %{author}): %{commit_message}"
