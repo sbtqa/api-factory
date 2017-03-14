@@ -53,7 +53,7 @@ public class RestEntityImpl extends AbstractRestEntity implements Rest {
             try {
                 response = client.execute(get);
             } catch (IOException ex) {
-                LOG.error("Ошибка при выполнении запроса", ex);
+                LOG.error("There is an error in the request processing", ex);
                 throw new AutotestError(ex);
 
             }
@@ -68,8 +68,8 @@ public class RestEntityImpl extends AbstractRestEntity implements Rest {
             }
 
             if (response.getStatusLine().getStatusCode() != 200) {
-                LOG.error("Статус ответа '{}'", response.getStatusLine().getReasonPhrase());
-                throw new AutotestError("Статус ответа не равен 200");
+                LOG.error("The response status is '{}'", response.getStatusLine().getReasonPhrase());
+                throw new AutotestError("The response status is not 200");
             }
 
             try {
@@ -118,8 +118,8 @@ public class RestEntityImpl extends AbstractRestEntity implements Rest {
             HttpResponse response = client.execute(post);
 
             if (response.getStatusLine().getStatusCode() != 200) {
-                LOG.error("Статус ответа '{}'", response.getStatusLine().getReasonPhrase());
-                throw new AutotestError("Статус ответа не равен 200");
+                LOG.error("The response status is '{}'", response.getStatusLine().getReasonPhrase());
+                throw new AutotestError("The response status is not 200");
             }
 
             Map<String, String> headersResponse = new HashMap<>();
