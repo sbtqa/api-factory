@@ -14,9 +14,9 @@ import ru.sbtqa.tag.apifactory.ApiEntry;
  */
 public class Repository {
 
-    private static final Logger log = LoggerFactory.getLogger(Repository.class);
+    private static final Logger LOG = LoggerFactory.getLogger(Repository.class);
     
-    private String repositoryType;
+    private final String repositoryType;
 
     private final Map<Class<? extends ApiEntry>, Bullet> instance = new LinkedHashMap<>();
     
@@ -77,7 +77,7 @@ public class Repository {
         bullet.setBody(body);
 
         instance.put(apiEntry, bullet);
-        log.info("Added to " + getType() + " repository key {} body {{}}", apiEntry.getName(), body);
+        LOG.info("Added to " + getType() + " repository key {} body {{}}", apiEntry.getName(), body);
     }
 
     /**
@@ -96,7 +96,7 @@ public class Repository {
         bullet.setHeaders(headers);
 
         instance.put(apiEntry, bullet);
-        log.info("Added to " + getType() + " repository key {} headers {}", apiEntry.getName(), headers);
+        LOG.info("Added to " + getType() + " repository key {} headers {}", apiEntry.getName(), headers);
     }
 
     /**
