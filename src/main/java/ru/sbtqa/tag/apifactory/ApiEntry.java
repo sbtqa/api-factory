@@ -6,10 +6,12 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.Proxy;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.io.IOUtils;
@@ -106,7 +108,7 @@ public abstract class ApiEntry {
      */
     public void fillParams(Map<String, String> params) {
 
-        for (Map.Entry<String,String> p: params.entrySet()) {
+        for (Map.Entry<String, String> p : params.entrySet()) {
             try {
                 setParamValueByTitle(p.getKey(), p.getValue());
             } catch (ApiException e) {
@@ -128,7 +130,7 @@ public abstract class ApiEntry {
         setBody();
 
         //if api action path contains parameters like '%parameter' replace it with it value
-        for (Map.Entry<String,String> parameter: parameters.entrySet()) {
+        for (Map.Entry<String, String> parameter : sortByLength(parameters).entrySet()) {
             requestPath = requestPath.replaceAll("%" + parameter.getKey(), parameter.getValue());
         }
     }
@@ -382,7 +384,7 @@ public abstract class ApiEntry {
             }
 
             //replace %parameter on parameter value
-            for (Map.Entry<String,String> parameter: parameters.entrySet()) {
+            for (Map.Entry<String, String> parameter : parameters.entrySet()) {
                 String value = (null != parameter.getValue()) ? parameter.getValue() : "";
                 body = body.replaceAll("%" + parameter.getKey(), value);
             }
@@ -448,6 +450,25 @@ public abstract class ApiEntry {
         }
     }
 
+    private Map<String, String> sortByLength(Map<String, String> map) {
+        Map<String, String> treeMap = new TreeMap<>(
+                new Comparator<String>() {
+            @Override
+            public int compare(String s1, String s2) {
+                if (s1.length() > s2.length()) {
+                    return -1;
+                } else if (s1.length() < s2.length()) {
+                    return 1;
+                } else {
+                    return s1.compareTo(s2);
+                }
+            }
+        });
+
+        treeMap.putAll(map);
+        return treeMap;
+    }
+    
     /**
      * Get headers
      *
