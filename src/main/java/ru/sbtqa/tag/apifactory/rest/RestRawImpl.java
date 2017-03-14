@@ -6,8 +6,11 @@ import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLDecoder;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.sbtqa.tag.apifactory.exception.ApiRestException;
@@ -83,6 +86,16 @@ public class RestRawImpl implements Rest {
 
             log.info("Body is: {}", body);
 
+            Map<String, String> headersResponse = new HashMap<>();
+            for (Map.Entry<String, List<String>> header : connection.getHeaderFields().entrySet()) {
+                String headerValueAsString = StringUtils.join(header.getValue(), ", "); 
+                if (headersResponse.containsKey(header.getKey())) {
+                    headersResponse.put(header.getKey(), headersResponse.get(header.getKey()) + ", " + headerValueAsString);
+                } else {
+                    headersResponse.put(header.getKey(), headerValueAsString);
+                }
+            }
+
             Object response;
             try {
                 response = IOUtils.toString((InputStream) connection.getContent(), encoding);
@@ -94,12 +107,11 @@ public class RestRawImpl implements Rest {
                 response = connection.getContent();
                 log.error("Response return an error", e);
             }
-            
-            return new Bullet(null, response.toString());
+
+            return new Bullet(headersResponse, response.toString());
         } catch (Exception ex) {
             log.error("There are an error in fire method", ex);
         }
         return null;
     }
 }
-
