@@ -46,7 +46,7 @@ public abstract class ApiEntry {
 
     private String requestPath = this.getClass().getAnnotation(ApiAction.class).path();
     private final Map<String, String> headers = new HashMap<>();
-    private final Map<String, String> parameters = new HashMap<>();
+    private final Map<String, Object> parameters = new HashMap<>();
     private String body = null;
     private String template = this.getClass().getAnnotation(ApiAction.class).template();
 
@@ -85,7 +85,7 @@ public abstract class ApiEntry {
      * @throws ru.sbtqa.tag.apifactory.exception.ApiException if parameter with
      * name doesn't exists or not available
      */
-    private void setParamValueByName(String name, String value) throws ApiException {
+    private void setParamValueByName(String name, Object value) throws ApiException {
         List<Field> fieldList = FieldUtilsExt.getDeclaredFieldsWithInheritance(this.getClass());
         for (Field field : fieldList) {
             if (name.equals(field.getName())) {
@@ -93,7 +93,7 @@ public abstract class ApiEntry {
                 try {
                     field.set(this, value);
                 } catch (IllegalArgumentException | IllegalAccessException ex) {
-                    throw new ApiEntryInitializationException("Parameter with name '" + name + "' is not available", ex);
+                    throw new ApiEntryInitializationException("Failed to write value to field '" + name + "'", ex);
                 }
                 return;
             }
@@ -130,8 +130,12 @@ public abstract class ApiEntry {
         setBody();
 
         //if api action path contains parameters like '%parameter' replace it with it value
-        for (Map.Entry<String, String> parameter : sortByLength(parameters).entrySet()) {
-            requestPath = requestPath.replaceAll("%" + parameter.getKey(), parameter.getValue());
+        for (Map.Entry<String, Object> parameter : sortByKeyLength(parameters).entrySet()) {
+            if (parameter.getValue() instanceof String) {
+                requestPath = requestPath.replaceAll("%" + parameter.getKey(), (String) parameter.getValue());
+            } else {
+                LOG.debug("Failed to substitute not String field to path template");
+            }
         }
     }
 
@@ -384,9 +388,13 @@ public abstract class ApiEntry {
             }
 
             //replace %parameter on parameter value
-            for (Map.Entry<String, String> parameter : parameters.entrySet()) {
-                String value = (null != parameter.getValue()) ? parameter.getValue() : "";
-                body = body.replaceAll("%" + parameter.getKey(), value);
+            for (Map.Entry<String, Object> parameter : parameters.entrySet()) {
+                if (parameter.getValue() instanceof String) {
+                    String value = (null != parameter.getValue()) ? (String) parameter.getValue() : "";
+                    body = body.replaceAll("%" + parameter.getKey(), value);
+                } else {
+                    LOG.debug("Failed to substitute not String field to body template");
+                }
             }
         }
     }
@@ -400,7 +408,7 @@ public abstract class ApiEntry {
             //@DependentResponseParam. Go to response in responseEntry and get some value by path
             if (null != field.getAnnotation(DependentResponseParam.class)) {
                 DependentResponseParam dependantParamAnnotation = field.getAnnotation(DependentResponseParam.class);
-                String fieldValue = null;
+                Object fieldValue = null;
 
                 if (!"".equals(dependantParamAnnotation.header())) {
                     Map<String, String> dependantResponseHeaders = ApiFactory.getApiFactory().getResponseRepository().getHeaders(dependantParamAnnotation.responseEntry());
@@ -429,7 +437,7 @@ public abstract class ApiEntry {
                         if (callbackResult instanceof Exception) {
                             throw (ApiException) callbackResult;
                         } else {
-                            fieldValue = (String) callbackResult;
+                            fieldValue = callbackResult;
                         }
                     } else {
                         throw new ApiEntryInitializationException("Could not initialize parser callback");
@@ -437,10 +445,14 @@ public abstract class ApiEntry {
                 }
 
                 if (!"".equals(dependantParamAnnotation.mask())) {
-                    Matcher matcher = Pattern.compile(dependantParamAnnotation.mask()).matcher(fieldValue);
-                    fieldValue = "";
-                    if (matcher.find()) {
-                        fieldValue = matcher.group(1);
+                    if (fieldValue instanceof String) {
+                        Matcher matcher = Pattern.compile(dependantParamAnnotation.mask()).matcher((String) fieldValue);
+                        fieldValue = "";
+                        if (matcher.find()) {
+                            fieldValue = matcher.group(1);
+                        }
+                    } else {
+                        throw new ApiException("Masking was failed because " + field.getName() + " is not instance of String");
                     }
                 }
 
@@ -450,8 +462,8 @@ public abstract class ApiEntry {
         }
     }
 
-    private Map<String, String> sortByLength(Map<String, String> map) {
-        Map<String, String> treeMap = new TreeMap<>(
+    private Map<String, Object> sortByKeyLength(Map<String, Object> map) {
+        Map<String, Object> treeMap = new TreeMap<>(
                 new Comparator<String>() {
             @Override
             public int compare(String s1, String s2) {
@@ -468,7 +480,7 @@ public abstract class ApiEntry {
         treeMap.putAll(map);
         return treeMap;
     }
-    
+
     /**
      * Get headers
      *
@@ -483,7 +495,7 @@ public abstract class ApiEntry {
      *
      * @return the parameters
      */
-    public Map<String, String> getParameters() {
+    public Map<String, Object> getParameters() {
         return parameters;
     }
 
