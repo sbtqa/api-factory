@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 import org.slf4j.Logger;
@@ -28,9 +27,9 @@ import ru.sbtqa.tag.parsers.core.ParserCallback;
  *
  *
  */
-public class ApiFactoryCore {
+public class ApiFactoryWrapper {
     
-    private static final Logger LOG = LoggerFactory.getLogger(ApiFactoryCore.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ApiFactoryWrapper.class);
 
     private String currentEntryTitle;
     private String currentEntryPath;
@@ -40,15 +39,15 @@ public class ApiFactoryCore {
     private Class<? extends ParserCallback> parser;
     private Class<? extends Rest> rest = RestRawImpl.class;
     private Class<? extends Soap> soap = SoapImpl.class;
-    private Repository responseRepository;
-    private Repository requestRepository;
+    private final Repository responseRepository;
+    private final Repository requestRepository;
 
     /**
      * Constructor for ApiFactory.
      *
      * @param pagesPackage a {@link java.lang.String} object.
      */
-    public ApiFactoryCore(String pagesPackage) {
+    public ApiFactoryWrapper(String pagesPackage) {
         this.entriesPackage = pagesPackage;
         this.responseRepository = new Repository(RepositoryType.RESPONSE);
         this.requestRepository = new Repository(RepositoryType.REQUEST);

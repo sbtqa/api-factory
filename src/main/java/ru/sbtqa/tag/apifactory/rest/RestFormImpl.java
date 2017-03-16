@@ -7,7 +7,10 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.sbtqa.tag.apifactory.exception.ApiRestException;
@@ -80,6 +83,16 @@ public class RestFormImpl implements Rest {
             log.info("Sending '" + method + "' request to URL : {}", URLDecoder.decode(url, encoding));
             log.info("Body is : {}", body);
 
+            Map<String, String> headersResponse = new HashMap<>();
+            for (Map.Entry<String, List<String>> header : connection.getHeaderFields().entrySet()) {
+                String headerValueAsString = StringUtils.join(header.getValue(), ", "); 
+                if (headersResponse.containsKey(header.getKey())) {
+                    headersResponse.put(header.getKey(), headersResponse.get(header.getKey()) + ", " + headerValueAsString);
+                } else {
+                    headersResponse.put(header.getKey(), headerValueAsString);
+                }
+            }
+            
             StringBuilder response;
             try (BufferedReader in = new BufferedReader(
                     new InputStreamReader(connection.getInputStream(), encoding))) {
@@ -91,7 +104,7 @@ public class RestFormImpl implements Rest {
 
                 log.info("Get response: {}", response.toString());
                 
-                return new Bullet(null, response.toString());
+                return new Bullet(headersResponse, response.toString());
             } catch (IOException e) {
                 log.error("Response return an error", e);
             }

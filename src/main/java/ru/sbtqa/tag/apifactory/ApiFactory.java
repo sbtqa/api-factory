@@ -8,7 +8,7 @@ import ru.sbtqa.tag.qautils.properties.Props;
  */
 public class ApiFactory {
 
-    private static ApiFactoryCore instance;
+    private static ApiFactoryWrapper instance;
     private static String apiRequestUrl = Props.get("api.baseurl");
 
     private ApiFactory() {
@@ -20,9 +20,9 @@ public class ApiFactory {
      *
      * @return api factory
      */
-    public static ApiFactoryCore getApiFactory() {
+    public static ApiFactoryWrapper getApiFactory() {
         if (null == instance) {
-            instance = new ApiFactoryCore(Props.get("api.entries.package"));
+            instance = new ApiFactoryWrapper(Props.get("api.entries.package"));
         }
         return instance;
     }
