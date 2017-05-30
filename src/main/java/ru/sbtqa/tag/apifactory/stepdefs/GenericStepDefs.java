@@ -1,75 +1,86 @@
 package ru.sbtqa.tag.apifactory.stepdefs;
 
+import cucumber.api.DataTable;
 import cucumber.api.java.en.And;
+import java.util.Map;
 import ru.sbtqa.tag.apifactory.ApiFactory;
 import ru.sbtqa.tag.apifactory.exception.ApiException;
 
+/**
+ * Basic step definitions, that should be available on every project
+ *
+ * <p>
+ * To pass a Cucumber {@link cucumber.api.DataTable} as a parameter to method,
+ * supply a table in the following format after a step ini feature:
+ * <p>
+ * | header 1| header 2 | | value 1 | value 2 |
+ * <p>
+ * This table will be converted to a {@link cucumber.api.DataTable} object.
+ * First line is not enforced to be a header.
+ * <p>
+ * To pass a list as parameter, use flattened table as follows: | value 1 | }
+ * value 2 |
+ *
+ * @see <a href="https://cucumber.io/docs/reference#step-definitions">Cucumber
+ * documentation</a>
+ */
 public class GenericStepDefs {
 
+    /**
+     * Execute api entry action (request) with no parameters
+     *
+     * @param action title value of the api entry annotation to execute
+     * @throws ApiException if there is an error while api entry executing
+     */
     @And("userSendRequestNoParams")
     public void userSendRequestNoParams(String action) throws ApiException {
         ApiFactory.getApiFactory().getApiEntry(action);
         ApiFactory.getApiFactory().getCurrentApiEntry().fireRequest();
     }
-    
+
+    /**
+     * Execute api entry action (request) with parameters from given
+     * {@link cucumber.api.DataTable}
+     *
+     * @param action title value of the api entry annotation to execute
+     * @param dataTable table of parameters
+     * @throws ApiException if there is an error while api entry executing
+     */
+    @And("userSendRequestTableParam")
+    public void userSendRequestTableParam(String action, DataTable dataTable) throws ApiException {
+        ApiFactory.getApiFactory().getApiEntry(action);
+        for (Map.Entry<String, String> dataTableRow : dataTable.asMap(String.class, String.class).entrySet()) {
+            ApiFactory.getApiFactory().getCurrentApiEntry().setParamValueByTitle(dataTableRow.getKey(), dataTableRow.getValue());
+        }
+        ApiFactory.getApiFactory().getCurrentApiEntry().fireRequest();
+    }
+
+    /**
+     * Execute a validation rule annotated by
+     * {@link ru.sbtqa.tag.apifactory.annotation.ApiValidationRule} on current
+     * api entry
+     *
+     * @param rule name of the validation rule (title value of the
+     * {@link ru.sbtqa.tag.apifactory.annotation.ApiValidationRule} annotation)
+     * @throws ApiException if there is an error while validation rule executing
+     */
     @And("userValidate")
     public void userValidate(String rule) throws ApiException {
         ApiFactory.getApiFactory().getCurrentApiEntry().fireValidationRule(rule);
     }
 
-//    /**
-//     * Execute action with one parameter User|he keywords are optional
-//     *
-//     * @param action title of the action to execute
-//     * @param param parameter
-//     * @throws PageInitializationException if current page is not initialized
-//     * @throws NoSuchMethodException if corresponding method doesn't exist
-//     */
-//    @And("userActionOneParam")
-//    public void userActionOneParam(String action, String param) throws PageInitializationException, NoSuchMethodException {
-//        PageFactory.getInstance().getCurrentPage().executeMethodByTitle(action, param);
-//    }
-//
-//    /**
-//     * Execute action with two parameters User|he keywords are optional
-//     *
-//     * @param action title of the action to execute
-//     * @param param1 first parameter
-//     * @param param2 second parameter
-//     * @throws PageInitializationException if current page is not initialized
-//     * @throws NoSuchMethodException if corresponding method doesn't exist
-//     */
-//    @And("userActionTwoParams")
-//    public void userActionTwoParams(String action, String param1, String param2) throws PageInitializationException, NoSuchMethodException {
-//        PageFactory.getInstance().getCurrentPage().executeMethodByTitle(action, param1, param2);
-//    }
-//
-//    /**
-//     * Execute action with three parameters User|he keywords are optional
-//     *
-//     * @param action title of the action to execute
-//     * @param param1 first parameter
-//     * @param param2 second patrameter
-//     * @param param3 third parameter
-//     * @throws PageInitializationException if current page is not initialized
-//     * @throws NoSuchMethodException if corresponding method doesn't exist
-//     */
-//    @And("userActionThreeParams")
-//    public void userActionThreeParams(String action, String param1, String param2, String param3) throws PageInitializationException, NoSuchMethodException {
-//        PageFactory.getInstance().getCurrentPage().executeMethodByTitle(action, param1, param2, param3);
-//    }
-//
-//    /**
-//     * Execute action with parameters from given {@link cucumber.api.DataTable}
-//     * User|he keywords are optional
-//     *
-//     * @param action title of the action to execute
-//     * @param dataTable table of parameters
-//     * @throws PageInitializationException if current page is not initialized
-//     * @throws NoSuchMethodException if corresponding method doesn't exist
-//     */
-//    @And("userActionTableParam")
-//    public void userActionTableParam(String action, DataTable dataTable) throws PageInitializationException, NoSuchMethodException {
-//        PageFactory.getInstance().getCurrentPage().executeMethodByTitle(action, dataTable);
-//    }
+    /**
+     * Execute a validation rule annotated by
+     * {@link ru.sbtqa.tag.apifactory.annotation.ApiValidationRule} on current
+     * api entry with parameters from given {@link cucumber.api.DataTable}
+     *
+     * @param rule name of the validation rule (title value of the
+     * {@link ru.sbtqa.tag.apifactory.annotation.ApiValidationRule} annotation)
+     * @param dataTable table of parameters
+     * @throws ApiException if there is an error while validation rule executing
+     */
+    @And("userValidateTable")
+    public void userValidateTable(String rule, DataTable dataTable) throws ApiException {
+        ApiFactory.getApiFactory().getCurrentApiEntry().fireValidationRule(rule, dataTable);
+    }
 }
