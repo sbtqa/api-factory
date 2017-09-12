@@ -1,6 +1,7 @@
 language: java
 addons:
   sonarcloud:
+    organization: "sbtqa"
     token:
       secure: o2QhHFOGZwrQeZZm1vopeeSXZHgUJSvub+ASgpnnmTNLGMPFnzU3Iv8zYGFUOrGyXd4yA9otxyskO0etR0KSQKM9zLvEZ79Z52gmcOwRfXijkDzXGktGRH5pC+M2FbGqWO2XMXykaw1i6+oSYbnTeQ1zXtQlICqy+Q09Azk0pPGatUjpeagXuwnCft9Kzo9b7T+lyQUKb1ZPVJRKHprQcA7Jtn/c//GUJ3A2kpnHiy70lzQdnheFZg/wkHb3vbAxCAqRmNr0n1dVRA6jabKvko/gEyfx4Q/3uzm8xoiMb5lrh/KlYQXgCkG8Zt5EfhQEbwWAnFuhjhwPpKHJqLonABAg4agQu8UVOxFYzAhG+dUoVRJKFH0m2SLqluw+61aT83KOFgztTgdk2QTmlHbQKDcf0hOsfKU6lfn+mmuEhSbph5tMRfYxCmdG0qajXyFGxytZYKjmU3jPZPSVD07LbNUR7qYTl+2Zn00SJXxjUbxd0rmYYuuv2Ds+Yjr+CibP+M/+0kSQovamF0n1hy65ILHlSlKGWOLF2eLXXs/SlgX21qKkRFxIiHhSLpZCorLtaFC24uhLonCPg3zbTAE+9eY234KGDwOMhUarjIkAs82R9YN1Ie8p6WkqcpXYvntivIuhWoIKe70guF/qQsBLuYcdoE9/Vl0LGlfTnaz7l/0=
     github_token:
