@@ -1,5 +1,5 @@
 # Api-Factory
-[![Build Status](https://travis-ci.org/sbtqa/api-factory.svg?branch=master)](https://travis-ci.org/sbtqa/api-factory) [![GitHub release](https://img.shields.io/github/release/sbtqa/api-factory.svg?style=flat-square)](https://github.com/sbtqa/api-factory/releases) [![Maven Central](https://img.shields.io/maven-central/v/ru.sbtqa.tag/api-factory.svg)](https://mvnrepository.com/artifact/ru.sbtqa.tag/api-factory)
+[![Build Status](https://travis-ci.org/sbtqa/api-factory.svg?branch=master)](https://travis-ci.org/sbtqa/api-factory) [![GitHub release](https://img.shields.io/github/release/sbtqa/api-factory.svg?style=flat-square)](https://github.com/sbtqa/api-factory/releases) [![Maven Central](https://img.shields.io/maven-central/v/ru.sbtqa.tag/api-factory.svg)](https://mvnrepository.com/artifact/ru.sbtqa.tag/api-factory) [![Gitter](https://img.shields.io/gitter/room/nwjs/nw.js.svg)](https://gitter.im/sbtqa-tag/Lobby)
 
 Api-Factory - opensource java framework для автоматизации функционального тестирования средствами API.
 
@@ -15,7 +15,7 @@ Api-Factory кроссплатформенный фреймворк, подде�
 1. Java 7 или выше
 
 ### Контакты
-Нашли ошибку или появились вопросы? [Проверьте](https://github.com/sbtqa/api-factory/issues), нет ли уже созданных задач. Если нет, то создайте [новую](https://github.com/sbtqa/api-factory/issues/new)!
+Нашли ошибку или появились вопросы? [Проверьте](https://github.com/sbtqa/api-factory/issues), нет ли уже созданных задач. Если нет, то создайте [новую](https://github.com/sbtqa/api-factory/issues/new)! Также свои вопросы можно задать в нашем чате в [gitter](https://gitter.im/sbtqa-tag/Lobby)
 
 ### Лицензия
 Api-Factory выпущен под лицензией Apache 2.0. [Подробности](https://github.com/sbtqa/api-factory/blob/master/LICENSE).
