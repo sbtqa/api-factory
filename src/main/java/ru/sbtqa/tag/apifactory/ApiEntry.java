@@ -299,13 +299,13 @@ public abstract class ApiEntry {
             field.setAccessible(true);
 
             String name = null;
-            String value = null;
+            Object value = null;
 
             //@ApiRequestParam. Get field name and value
             if (null != field.getAnnotation(ApiRequestParam.class)) {
                 name = field.getName();
                 try {
-                    value = (String) field.get(this);
+                    value = field.get(this);
                 } catch (IllegalArgumentException | IllegalAccessException ex) {
                     throw new ApiEntryInitializationException("Parameter with name '" + name + "' is not available", ex);
                 }
@@ -391,6 +391,18 @@ public abstract class ApiEntry {
             for (Map.Entry<String, Object> parameter : parameters.entrySet()) {
                 if (parameter.getValue() instanceof String) {
                     String value = (null != parameter.getValue()) ? (String) parameter.getValue() : "";
+                    body = body.replaceAll("%" + parameter.getKey(), value);
+                } else if (parameter.getValue() instanceof List) {
+                    String value = "";
+                    String separator = Props.get("api.dependent.array.separator");
+                    List<String> params = ((List) parameter.getValue());
+                    for (int i = 0; i < params.size(); i++) {
+                        value += params.get(i);
+                        if (separator != null && i != params.size() - 1) {
+                            value += separator;
+                        }
+                    }
+
                     body = body.replaceAll("%" + parameter.getKey(), value);
                 } else {
                     LOG.debug("Failed to substitute not String field to body template");
