@@ -15,7 +15,7 @@ public class Bullet {
     private static final Logger log = LoggerFactory.getLogger(Bullet.class);
     
     private Map<String, String> headers = new HashMap<>();
-    private String body = null;
+    private String body = "";
 
     public Bullet() {
         log.debug("Created empty bullet");
