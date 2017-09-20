@@ -421,16 +421,21 @@ public abstract class ApiEntry {
             if (null != field.getAnnotation(DependentResponseParam.class)) {
                 DependentResponseParam dependantParamAnnotation = field.getAnnotation(DependentResponseParam.class);
                 Object fieldValue = null;
+                Class responseEntry = dependantParamAnnotation.responseEntry();
+
+                if(responseEntry == void.class && dependantParamAnnotation.usePreviousResponse()){
+                    responseEntry = ApiFactory.getApiFactory().getResponseRepository().getLastEntryInRepository();
+                }
 
                 if (!"".equals(dependantParamAnnotation.header())) {
-                    Map<String, String> dependantResponseHeaders = ApiFactory.getApiFactory().getResponseRepository().getHeaders(dependantParamAnnotation.responseEntry());
+                    Map<String, String> dependantResponseHeaders = ApiFactory.getApiFactory().getResponseRepository().getHeaders(responseEntry);
                     for (Map.Entry<String, String> header : dependantResponseHeaders.entrySet()) {
                         if (header.getKey().equals(dependantParamAnnotation.header())) {
                             fieldValue = header.getValue();
                         }
                     }
                 } else {
-                    Object dependantResponseBody = ApiFactory.getApiFactory().getResponseRepository().getBody(dependantParamAnnotation.responseEntry());
+                    Object dependantResponseBody = ApiFactory.getApiFactory().getResponseRepository().getBody(responseEntry);
 
                     //Use applied parser to get value by path throw the callback
                     if (ApiFactory.getApiFactory().getParser() != null) {
@@ -518,6 +523,15 @@ public abstract class ApiEntry {
      */
     public String getBody() {
         return body;
+    }
+
+    /**
+     * Set request body
+     *
+     * @param body a {@link java.lang.String} object.
+     */
+    public void setBody(String body) {
+        this.body = body;
     }
 
     /**

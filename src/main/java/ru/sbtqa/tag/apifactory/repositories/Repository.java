@@ -111,6 +111,19 @@ public class Repository {
         }
         return bullet;
     }
+
+    /**
+     * Get last api entry in repository.
+     *
+     * @return a {@link java.lang.Class} object.
+     */
+    public Class getLastEntryInRepository() {
+        Class clazz = null;
+        for (Map.Entry<Class<? extends ApiEntry>, Bullet> entry : instance.entrySet()) {
+            clazz = entry.getKey();
+        }
+        return clazz;
+    }
     
     /**
      * Get repository type as String
