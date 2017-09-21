@@ -20,7 +20,14 @@ public @interface DependentResponseParam {
      *
      * @return a {@link java.lang.Class} object.
      */
-    public Class responseEntry();
+    public Class responseEntry() default void.class;
+
+    /**
+     * Use data from previous response. Use without 'responseEntry'
+     *
+     * @return a {@link java.lang.Boolean} object.
+     */
+    public boolean usePreviousResponse() default true;
 
     /**
      * Path to search. Useful for body of response.
