@@ -423,7 +423,8 @@ public abstract class ApiEntry {
                 Object fieldValue = null;
                 Class responseEntry = dependantParamAnnotation.responseEntry();
 
-                if(responseEntry == void.class && dependantParamAnnotation.usePreviousResponse()){
+                if ((responseEntry == void.class || responseEntry == null)
+                        && dependantParamAnnotation.usePreviousResponse()) {
                     responseEntry = ApiFactory.getApiFactory().getResponseRepository().getLastEntryInRepository();
                 }
 
