@@ -103,7 +103,7 @@ public class RestRawImpl implements Rest {
             } catch (IOException e) {
                 if (connection.getContentType() != null) {
                     response = IOUtils.toString(connection.getErrorStream(), encoding);
-                    log.error("Response is {}", response, e);
+                    LOG.error("Response is {}", response, e);
                 } else {
                     return new Bullet(headersResponse, null);
                 }
