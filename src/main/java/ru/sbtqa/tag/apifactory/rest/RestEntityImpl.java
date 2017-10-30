@@ -73,7 +73,8 @@ public class RestEntityImpl extends AbstractRestEntity implements Rest {
             }
 
             try {
-                bullet = new Bullet(headersResponse, EntityUtils.toString(response.getEntity()));
+                bullet = new Bullet(headersResponse,
+                        EntityUtils.toString(response.getEntity(), Props.get("api.encoding")));
             } catch (IOException | ParseException ex) {
                 LOG.error("Error in response body get", ex);
             }
@@ -100,6 +101,7 @@ public class RestEntityImpl extends AbstractRestEntity implements Rest {
             LOG.info("Headers are: {}", headers);
 
             List<NameValuePair> postParams = new ArrayList<>();
+            String encoding = Props.get("api.encoding");
             if (body instanceof Map) {
                 Map<String, String> params = (Map<String, String>) body;
 
@@ -112,7 +114,7 @@ public class RestEntityImpl extends AbstractRestEntity implements Rest {
                 }
                 LOG.info("Body (form-data) is: {}", body);
             } else if (body instanceof String) {
-                post.setEntity(new StringEntity((String) body, Props.get("api.encoding")));
+                post.setEntity(new StringEntity((String) body, encoding));
             }
 
             HttpResponse response = client.execute(post);
@@ -132,7 +134,7 @@ public class RestEntityImpl extends AbstractRestEntity implements Rest {
                 }
             }
 
-            return new Bullet(headersResponse, EntityUtils.toString(response.getEntity()));
+            return new Bullet(headersResponse, EntityUtils.toString(response.getEntity(), encoding));
         } catch (IOException ex) {
             LOG.error("Failed to get response", ex);
         } finally {

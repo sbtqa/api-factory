@@ -65,7 +65,7 @@ public class RestFormImpl implements Rest {
                 }
             }
 
-            connection.setRequestProperty("Content-Type", "application/x-www-form-urlencodingd");
+            connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
             StringBuilder postData = new StringBuilder();
             String encoding = Props.get("api.encoding");
             for (Map.Entry<String, String> param : ((Map<String, String>) body).entrySet()) {
