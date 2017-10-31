@@ -23,7 +23,7 @@ import ru.sbtqa.tag.qautils.properties.Props;
  */
 public class RestRawImpl implements Rest {
 
-    private static final Logger log = LoggerFactory.getLogger(RestRawImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(RestRawImpl.class);
 
     @Override
     public Bullet get(String url, Map<String, String> headers) throws ApiRestException {
@@ -50,7 +50,7 @@ public class RestRawImpl implements Rest {
         return fire("DELETE", url, headers, null);
     }
 
-    private Bullet fire(String mthd, String url, Map<String, String> headers, Object body) throws ApiRestException {
+    private Bullet fire(String mthd, String url, Map<String, String> headers, Object body) {
         try {
             URL obj = new URL(url.replaceAll(" ", "%20"));
             HttpURLConnection connection = (HttpURLConnection) obj.openConnection();
@@ -67,14 +67,14 @@ public class RestRawImpl implements Rest {
             connection.setRequestMethod(method);
             connection.setDoOutput(true);
             String encoding = Props.get("api.encoding");
-            log.info("Sending '" + method + "' request to URL : {}", URLDecoder.decode(url, encoding));
+            LOG.info("Sending '" + method + "' request to URL : {}", URLDecoder.decode(url, encoding));
 
             //add request header
             if (null != headers && !headers.isEmpty()) {
                 for (Map.Entry<String, String> header : headers.entrySet()) {
                     connection.setRequestProperty(header.getKey(), header.getValue());
                 }
-                log.info("Headers are: {}", headers);
+                LOG.info("Headers are: {}", headers);
             }
 
             //add body
@@ -84,7 +84,7 @@ public class RestRawImpl implements Rest {
                 }
             }
 
-            log.info("Body is: {}", body);
+            LOG.info("Body is: {}", body);
 
             Map<String, String> headersResponse = new HashMap<>();
             for (Map.Entry<String, List<String>> header : connection.getHeaderFields().entrySet()) {
@@ -99,22 +99,22 @@ public class RestRawImpl implements Rest {
             Object response;
             try {
                 response = IOUtils.toString((InputStream) connection.getContent(), encoding);
-                log.info("Response is {}", response);
+                LOG.info("Response is {}", response);
             } catch (IOException e) {
                 if (connection.getContentType() != null) {
                     response = IOUtils.toString(connection.getErrorStream(), encoding);
-                    log.error("Response is {}", response, e);
+                    LOG.error("Response is {}", response, e);
                 } else {
                     return new Bullet(headersResponse, null);
                 }
             } catch (ClassCastException e) {
                 response = connection.getContent();
-                log.error("Response return an error", e);
+                LOG.error("Response return an error", e);
             }
 
             return new Bullet(headersResponse, response.toString());
-        } catch (Exception ex) {
-            log.error("There are an error in fire method", ex);
+        } catch (IOException ex) {
+            LOG.error("Failed to get response", ex);
         }
         return null;
     }
