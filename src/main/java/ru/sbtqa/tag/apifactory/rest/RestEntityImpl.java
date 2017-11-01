@@ -119,11 +119,6 @@ public class RestEntityImpl extends AbstractRestEntity implements Rest {
 
             HttpResponse response = client.execute(post);
 
-            if (response.getStatusLine().getStatusCode() != 200) {
-                LOG.error("The response status is '{}'", response.getStatusLine().getReasonPhrase());
-                throw new AutotestError("The response status is not 200");
-            }
-
             Map<String, String> headersResponse = new HashMap<>();
             for (Header h : response.getAllHeaders()) {
                 ParamsHelper.addParam(h.getName(), h.getValue());
