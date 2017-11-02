@@ -67,11 +67,6 @@ public class RestEntityImpl extends AbstractRestEntity implements Rest {
                 }
             }
 
-            if (response.getStatusLine().getStatusCode() != 200) {
-                LOG.error("The response status is '{}'", response.getStatusLine().getReasonPhrase());
-                throw new AutotestError("The response status is not 200");
-            }
-
             try {
                 bullet = new Bullet(headersResponse,
                         EntityUtils.toString(response.getEntity(), Props.get("api.encoding")));
