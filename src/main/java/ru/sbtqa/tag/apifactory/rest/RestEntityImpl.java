@@ -11,7 +11,9 @@ import org.apache.http.NameValuePair;
 import org.apache.http.ParseException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPatch;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.utils.HttpClientUtils;
 import org.apache.http.entity.StringEntity;
@@ -93,43 +95,7 @@ public class RestEntityImpl extends AbstractRestEntity implements Rest {
         try {
             LOG.info("Sending 'POST' request to URL : {}", url);
             final HttpPost post = new HttpPost(url);
-
-            for (Map.Entry<String,String> h: headers.entrySet()) {
-                post.setHeader(h.getKey(), h.getValue());
-            }
-
-            LOG.info("Headers are: {}", headers);
-
-            List<NameValuePair> postParams = new ArrayList<>();
-            String encoding = Props.get("api.encoding");
-            if (body instanceof Map) {
-                Map<String, String> params = (Map<String, String>) body;
-
-                for (Map.Entry<String,String> e: params.entrySet()) {
-                    postParams.add(new BasicNameValuePair(e.getKey(), e.getValue()));
-                }
-
-                if (!postParams.isEmpty()) {
-                    post.setEntity(new UrlEncodedFormEntity(postParams));
-                }
-                LOG.info("Body (form-data) is: {}", body);
-            } else if (body instanceof String) {
-                post.setEntity(new StringEntity((String) body, encoding));
-            }
-
-            HttpResponse response = client.execute(post);
-
-            Map<String, String> headersResponse = new HashMap<>();
-            for (Header h : response.getAllHeaders()) {
-                ParamsHelper.addParam(h.getName(), h.getValue());
-                if (headersResponse.containsKey(h.getName())) {
-                    headersResponse.put(h.getName(), headersResponse.get(h.getName()) + "; " + h.getValue());
-                } else {
-                    headersResponse.put(h.getName(), h.getValue());
-                }
-            }
-
-            return new Bullet(headersResponse, EntityUtils.toString(response.getEntity(), encoding));
+            performRequest(headers, body, client, post);
         } catch (IOException ex) {
             LOG.error("Failed to get response", ex);
         } finally {
@@ -139,4 +105,65 @@ public class RestEntityImpl extends AbstractRestEntity implements Rest {
         return null;
     }
 
+    @Override
+    public Bullet patch(String url, Map<String, String> headers, Object body) throws ApiRestException {
+        HttpClient client = HttpClients.createDefault();
+
+        try {
+            LOG.info("Sending 'PATCH' request to URL : {}", url);
+            HttpPatch patch = new HttpPatch(url);
+            return performRequest(headers, body, client, patch);
+        } catch (IOException ex) {
+            LOG.error("Failed to get response", ex);
+        } finally {
+            HttpClientUtils.closeQuietly(client);
+        }
+
+        return null;
+    }
+
+    private Bullet performRequest(Map<String, String> headers, Object body, HttpClient client,
+                                  HttpEntityEnclosingRequestBase request) throws IOException {
+        for (Map.Entry<String,String> h: headers.entrySet()) {
+            request.setHeader(h.getKey(), h.getValue());
+        }
+
+        LOG.info("Headers are: {}", headers);
+
+        List<NameValuePair> postParams = new ArrayList<>();
+        String encoding = Props.get("api.encoding");
+        if (body instanceof Map) {
+            Map<String, String> params = (Map<String, String>) body;
+
+            for (Map.Entry<String,String> e: params.entrySet()) {
+                postParams.add(new BasicNameValuePair(e.getKey(), e.getValue()));
+            }
+
+            if (!postParams.isEmpty()) {
+                request.setEntity(new UrlEncodedFormEntity(postParams));
+            }
+            LOG.info("Body (form-data) is: {}", body);
+        } else if (body instanceof String) {
+            request.setEntity(new StringEntity((String) body, encoding));
+        }
+
+        HttpResponse response = client.execute(request);
+
+        Map<String, String> headersResponse = new HashMap<>();
+        for (Header h : response.getAllHeaders()) {
+            ParamsHelper.addParam(h.getName(), h.getValue());
+            if (headersResponse.containsKey(h.getName())) {
+                headersResponse.put(h.getName(), headersResponse.get(h.getName()) + "; " + h.getValue());
+            } else {
+                headersResponse.put(h.getName(), h.getValue());
+            }
+        }
+        String bodyResponse = null;
+        try {
+            bodyResponse = EntityUtils.toString(response.getEntity(), encoding);
+        } catch (Exception e) {
+            LOG.info(e.getMessage());
+        }
+        return new Bullet(headersResponse, bodyResponse);
+    }
 }
