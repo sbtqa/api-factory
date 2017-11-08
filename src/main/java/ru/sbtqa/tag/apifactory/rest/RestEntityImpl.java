@@ -90,7 +90,7 @@ public class RestEntityImpl extends AbstractRestEntity implements Rest {
         try {
             LOG.info("Sending 'POST' request to URL : {}", url);
             final HttpPost post = new HttpPost(url);
-            performRequest(headers, body, client, post);
+            return performRequest(headers, body, client, post);
         } catch (IOException ex) {
             LOG.error("Failed to get response", ex);
         } finally {
