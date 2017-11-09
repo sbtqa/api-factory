@@ -70,8 +70,11 @@ public class RestEntityImpl extends AbstractRestEntity implements Rest {
             }
 
             try {
-                bullet = new Bullet(headersResponse,
-                        EntityUtils.toString(response.getEntity(), Props.get("api.encoding")));
+                String responseBody = null;
+                if (response.getEntity().getContentType() != null) {
+                    responseBody = EntityUtils.toString(response.getEntity(), Props.get("api.encoding"));
+                }
+                bullet = new Bullet(headersResponse, responseBody);
             } catch (IOException | ParseException ex) {
                 LOG.error("Error in response body get", ex);
             }
