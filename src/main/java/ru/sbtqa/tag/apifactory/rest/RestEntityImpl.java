@@ -32,7 +32,6 @@ import ru.sbtqa.tag.qautils.properties.Props;
  *
  *
  */
-//todo extract all the common code
 public class RestEntityImpl extends AbstractRestEntity implements Rest {
 
     private static final Logger LOG = LoggerFactory.getLogger(RestEntityImpl.class);
@@ -46,35 +45,21 @@ public class RestEntityImpl extends AbstractRestEntity implements Rest {
             LOG.info("Request url {}", url);
             final HttpGet get = new HttpGet(url);
 
-            for (Map.Entry<String,String> h: headers.entrySet()) {
-                get.setHeader(h.getKey(), h.getValue());
-            }
+            setHeaders(headers, get);
 
             LOG.info("Request headers {}", headers);
 
-            HttpResponse response = null;
+            HttpResponse response;
             try {
                 response = client.execute(get);
             } catch (IOException ex) {
                 LOG.error("There is an error in the request processing", ex);
                 throw new AutotestError(ex);
-
             }
-            Map<String, String> headersResponse = new HashMap<>();
-            for (Header h : response.getAllHeaders()) {
-                ParamsHelper.addParam(h.getName(), h.getValue());
-                if (headersResponse.containsKey(h.getName())) {
-                    headersResponse.put(h.getName(), headersResponse.get(h.getName()) + "; " + h.getValue());
-                } else {
-                    headersResponse.put(h.getName(), h.getValue());
-                }
-            }
+            Map<String, String> headersResponse = getHeadersMap(response);
 
             try {
-                String responseBody = null;
-                if (response.getEntity().getContentType() != null) {
-                    responseBody = EntityUtils.toString(response.getEntity(), Props.get("api.encoding"));
-                }
+                String responseBody = getEntityString(response, Props.get("api.encoding"));
                 bullet = new Bullet(headersResponse, responseBody);
             } catch (IOException | ParseException ex) {
                 LOG.error("Error in response body get", ex);
@@ -85,6 +70,32 @@ public class RestEntityImpl extends AbstractRestEntity implements Rest {
         }
 
         return bullet;
+    }
+
+    private String getEntityString(HttpResponse response, String encoding) throws IOException {
+        if (response.getEntity().getContentType() != null) {
+            return EntityUtils.toString(response.getEntity(), encoding);
+        }
+        return null;
+    }
+
+    private void setHeaders(final Map<String, String> headers, HttpGet get) {
+        for (Map.Entry<String,String> h: headers.entrySet()) {
+            get.setHeader(h.getKey(), h.getValue());
+        }
+    }
+
+    private Map<String, String> getHeadersMap(final HttpResponse response) {
+        Map<String, String> headersResponse = new HashMap<>();
+        for (Header h : response.getAllHeaders()) {
+            ParamsHelper.addParam(h.getName(), h.getValue());
+            if (headersResponse.containsKey(h.getName())) {
+                headersResponse.put(h.getName(), headersResponse.get(h.getName()) + "; " + h.getValue());
+            } else {
+                headersResponse.put(h.getName(), h.getValue());
+            }
+        }
+        return headersResponse;
     }
 
     @Override
@@ -146,18 +157,10 @@ public class RestEntityImpl extends AbstractRestEntity implements Rest {
 
         HttpResponse response = client.execute(request);
 
-        Map<String, String> headersResponse = new HashMap<>();
-        for (Header h : response.getAllHeaders()) {
-            ParamsHelper.addParam(h.getName(), h.getValue());
-            if (headersResponse.containsKey(h.getName())) {
-                headersResponse.put(h.getName(), headersResponse.get(h.getName()) + "; " + h.getValue());
-            } else {
-                headersResponse.put(h.getName(), h.getValue());
-            }
-        }
+        Map<String, String> headersResponse = getHeadersMap(response);
         String bodyResponse = null;
         try {
-            bodyResponse = EntityUtils.toString(response.getEntity(), encoding);
+            bodyResponse = getEntityString(response, encoding);
         } catch (Exception e) {
             LOG.info(e.getMessage());
         }
