@@ -32,6 +32,7 @@ import ru.sbtqa.tag.qautils.properties.Props;
  *
  *
  */
+//todo extract all the common code
 public class RestEntityImpl extends AbstractRestEntity implements Rest {
 
     private static final Logger LOG = LoggerFactory.getLogger(RestEntityImpl.class);
@@ -96,11 +97,10 @@ public class RestEntityImpl extends AbstractRestEntity implements Rest {
             return performRequest(headers, body, client, post);
         } catch (IOException ex) {
             LOG.error("Failed to get response", ex);
+            throw new ApiRestException("Empty bullet", ex);
         } finally {
             HttpClientUtils.closeQuietly(client);
         }
-
-        return null;
     }
 
     @Override
@@ -113,11 +113,10 @@ public class RestEntityImpl extends AbstractRestEntity implements Rest {
             return performRequest(headers, body, client, patch);
         } catch (IOException ex) {
             LOG.error("Failed to get response", ex);
+            throw new ApiRestException("Empty bullet", ex);
         } finally {
             HttpClientUtils.closeQuietly(client);
         }
-
-        return null;
     }
 
     private Bullet performRequest(Map<String, String> headers, Object body, HttpClient client,
