@@ -17,16 +17,11 @@ import java.util.regex.Pattern;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ru.sbtqa.tag.apifactory.annotation.AddBracket;
-import ru.sbtqa.tag.apifactory.annotation.ApiAction;
-import ru.sbtqa.tag.apifactory.annotation.ApiRequestHeader;
-import ru.sbtqa.tag.apifactory.annotation.ApiRequestParam;
-import ru.sbtqa.tag.apifactory.annotation.ApiValidationRule;
-import ru.sbtqa.tag.apifactory.annotation.DependentResponseParam;
-import ru.sbtqa.tag.apifactory.annotation.PutInStash;
+import ru.sbtqa.tag.apifactory.annotation.*;
 import ru.sbtqa.tag.apifactory.exception.ApiEntryInitializationException;
 import ru.sbtqa.tag.apifactory.exception.ApiException;
 import ru.sbtqa.tag.apifactory.repositories.Bullet;
+import ru.sbtqa.tag.apifactory.rest.HTTP;
 import ru.sbtqa.tag.apifactory.rest.Rest;
 import ru.sbtqa.tag.apifactory.soap.Soap;
 import ru.sbtqa.tag.datajack.Stash;
@@ -161,7 +156,7 @@ public abstract class ApiEntry {
      */
     public Object fire(String url) throws ApiException {
         //Get request method of current api object
-        String requestMethod = this.getClass().getAnnotation(ApiAction.class).method().toLowerCase();
+        HTTP requestMethod = this.getClass().getAnnotation(ApiAction.class).method();
         String templateName = this.getClass().getAnnotation(ApiAction.class).template();
 
         Bullet response = null;
@@ -181,30 +176,30 @@ public abstract class ApiEntry {
 
             Map<String, String> hdrs = getHeaders();
             switch (requestMethod) {
-                case "get":
+                case GET:
                     response = (Bullet) rest.get(url, hdrs);
                     ApiFactory.getApiFactory().addRequestHeadersToRepository(this.getClass(), hdrs);
                     break;
-                case "post":
+                case POST:
                     response = (Bullet) rest.post(url, hdrs, bd);
                     request = new Bullet(hdrs, bd.toString());
                     ApiFactory.getApiFactory().addRequestToRepository(this.getClass(), request);
                     break;
-                case "put":
+                case PUT:
                     response = (Bullet) rest.put(url, hdrs, bd);
                     request = new Bullet(hdrs, bd.toString());
                     ApiFactory.getApiFactory().addRequestToRepository(this.getClass(), request);
                     break;
-                case "patch":
+                case PATCH:
                     response = (Bullet) rest.patch(url, hdrs, bd);
                     request = new Bullet(hdrs, bd.toString());
                     ApiFactory.getApiFactory().addRequestToRepository(this.getClass(), request);
                     break;
-                case "delete":
+                case DELETE:
                     response = (Bullet) rest.delete(url, hdrs);
                     ApiFactory.getApiFactory().addRequestHeadersToRepository(this.getClass(), hdrs);
                     break;
-                case "soap":
+                case SOAP:
                     response = (Bullet) soap.send(url, hdrs, bd, Proxy.NO_PROXY);
                     request = new Bullet(hdrs, bd.toString());
                     ApiFactory.getApiFactory().addRequestToRepository(this.getClass(), request);
