@@ -6,6 +6,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import ru.sbtqa.tag.apifactory.ApiEntry;
 import ru.sbtqa.tag.apifactory.EmptyApiEntry;
+import ru.sbtqa.tag.apifactory.rest.HTTP;
 
 /**
  * This annotation used above ApiEntry class declaration
@@ -33,9 +34,9 @@ public @interface ApiAction {
     /**
      * HTTP method used to execute api method
      *
-     * @return a {@link java.lang.String} object.
+     * @return a {@link HTTP} object.
      */
-    public String method();
+    public HTTP method();
 
     /**
      * Body template
