@@ -376,6 +376,7 @@ public abstract class ApiEntry {
         for (Field field : fieldList) {
             ApiUrlParam urlParam = field.getAnnotation(ApiUrlParam.class);
             if (urlParam != null && !urlParam.title().equals("")) {
+                field.setAccessible(true);
                 try {
                     String param = (String) field.get(this);
                     if (param != null && !param.equals("")) {
