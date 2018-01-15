@@ -375,12 +375,12 @@ public abstract class ApiEntry {
         String urlParamString = "";
         for (Field field : fieldList) {
             ApiUrlParam urlParam = field.getAnnotation(ApiUrlParam.class);
-            if (urlParam != null && !urlParam.title().equals("")) {
+            if (urlParam != null && !"".equals(urlParam.title())) {
                 field.setAccessible(true);
                 try {
                     String param = (String) field.get(this);
                     if (param != null && !param.equals("")) {
-                        if (!urlParamString.equals("")) {
+                        if (!"".equals(urlParamString)) {
                             urlParamString += "&";
                         }
                         urlParamString += urlParam.title() + "=" + param;
