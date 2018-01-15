@@ -56,8 +56,8 @@ public abstract class ApiEntry {
         List<Field> fieldList = FieldUtilsExt.getDeclaredFieldsWithInheritance(this.getClass());
         for (Field field : fieldList) {
             for (Annotation annotation : field.getAnnotations()) {
-                if (annotation instanceof ApiRequestParam
-                        && ((ApiRequestParam) annotation).title().equals(title)
+                if (((annotation instanceof ApiRequestParam && ((ApiRequestParam) annotation).title().equals(title))
+                        || (annotation instanceof ApiUrlParam && ((ApiUrlParam) annotation).title().equals(title)))
                         && value != null && !value.isEmpty()) {
                     field.setAccessible(true);
                     try {
@@ -158,6 +158,8 @@ public abstract class ApiEntry {
         //Get request method of current api object
         HTTP requestMethod = this.getClass().getAnnotation(ApiAction.class).method();
         String templateName = this.getClass().getAnnotation(ApiAction.class).template();
+
+        url = getFullUrl(url);
 
         Bullet response = null;
         Bullet request = null;
@@ -360,6 +362,42 @@ public abstract class ApiEntry {
                 }
             }
         }
+    }
+
+    /**
+     * Get url with param if param field exist
+     *
+     * @return partUrl withParams
+     * @throws ru.sbtqa.tag.apifactory.exception.ApiException
+     */
+    private String getFullUrl(String url) throws ApiException {
+        List<Field> fieldList = FieldUtilsExt.getDeclaredFieldsWithInheritance(this.getClass());
+        String urlParamString = "";
+        for (Field field : fieldList) {
+            ApiUrlParam urlParam = field.getAnnotation(ApiUrlParam.class);
+            if (urlParam != null && !urlParam.title().equals("")) {
+                try {
+                    String param = (String) field.get(this);
+                    if (param != null && !param.equals("")) {
+                        if (!urlParamString.equals("")) {
+                            urlParamString += "&";
+                        }
+                        urlParamString += urlParam.title() + "=" + param;
+                    }
+                } catch (IllegalArgumentException | IllegalAccessException ex) {
+                    throw new ApiEntryInitializationException("Parameter with title '" + urlParam.title()+ "' is not available", ex);
+                }
+            }
+        }
+
+        if (!urlParamString.equals("")) {
+            if (url.contains("?")) {
+                url += "&" + urlParamString;
+            } else {
+                url += "?" + urlParamString;
+            }
+        }
+        return url;
     }
 
     /**
