@@ -5,9 +5,7 @@ import cucumber.api.java.en.And;
 import ru.sbtqa.tag.apifactory.exception.ApiException;
 import ru.sbtqa.tag.apifactory.stepdefs.GenericStepDefs;
 
-/**
- * Created by Anton on 06.04.2018.
- */
+
 public class StepDefs extends GenericStepDefs {
 
     /**
