@@ -32,7 +32,6 @@ public class GenericStepDefs {
      * @param action title value of the api entry annotation to execute
      * @throws ApiException if there is an error while api entry executing
      */
-    @And("userSendRequestNoParams")
     public void userSendRequestNoParams(String action) throws ApiException {
         ApiFactory.getApiFactory().getApiEntry(action);
         ApiFactory.getApiFactory().getCurrentApiEntry().fireRequest();
@@ -46,7 +45,6 @@ public class GenericStepDefs {
      * @param dataTable table of parameters
      * @throws ApiException if there is an error while api entry executing
      */
-    @And("userSendRequestTableParam")
     public void userSendRequestTableParam(String action, DataTable dataTable) throws ApiException {
         ApiFactory.getApiFactory().getApiEntry(action);
         for (Map.Entry<String, String> dataTableRow : dataTable.asMap(String.class, String.class).entrySet()) {
@@ -64,7 +62,6 @@ public class GenericStepDefs {
      * {@link ru.sbtqa.tag.apifactory.annotation.ApiValidationRule} annotation)
      * @throws ApiException if there is an error while validation rule executing
      */
-    @And("userValidate")
     public void userValidate(String rule) throws ApiException {
         ApiFactory.getApiFactory().getCurrentApiEntry().fireValidationRule(rule);
     }
@@ -79,7 +76,6 @@ public class GenericStepDefs {
      * @param dataTable table of parameters
      * @throws ApiException if there is an error while validation rule executing
      */
-    @And("userValidateTable")
     public void userValidateTable(String rule, DataTable dataTable) throws ApiException {
         ApiFactory.getApiFactory().getCurrentApiEntry().fireValidationRule(rule, dataTable);
     }
