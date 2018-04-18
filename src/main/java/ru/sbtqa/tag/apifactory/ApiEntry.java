@@ -37,13 +37,13 @@ import ru.sbtqa.tag.qautils.reflect.FieldUtilsExt;
  */
 public abstract class ApiEntry {
 
-    private static final Logger LOG = LoggerFactory.getLogger(ApiEntry.class);
+    protected static final Logger LOG = LoggerFactory.getLogger(ApiEntry.class);
 
-    private String requestPath = this.getClass().getAnnotation(ApiAction.class).path();
-    private final Map<String, String> headers = new HashMap<>();
-    private final Map<String, Object> parameters = new HashMap<>();
-    private String body = null;
-    private String template = this.getClass().getAnnotation(ApiAction.class).template();
+    protected String requestPath = this.getClass().getAnnotation(ApiAction.class).path();
+    protected final Map<String, String> headers = new HashMap<>();
+    protected final Map<String, Object> parameters = new HashMap<>();
+    protected String body = null;
+    protected String template = this.getClass().getAnnotation(ApiAction.class).template();
 
     /**
      * Set request parameter by title
@@ -80,7 +80,7 @@ public abstract class ApiEntry {
      * @throws ru.sbtqa.tag.apifactory.exception.ApiException if parameter with
      * name doesn't exists or not available
      */
-    private void setParamValueByName(String name, Object value) throws ApiException {
+    protected void setParamValueByName(String name, Object value) throws ApiException {
         List<Field> fieldList = FieldUtilsExt.getDeclaredFieldsWithInheritance(this.getClass());
         for (Field field : fieldList) {
             if (name.equals(field.getName())) {
@@ -348,7 +348,7 @@ public abstract class ApiEntry {
      * @throws ru.sbtqa.tag.apifactory.exception.ApiException if one of headers
      * is not available
      */
-    private void setHeaders() throws ApiException {
+    protected void setHeaders() throws ApiException {
         List<Field> fieldList = FieldUtilsExt.getDeclaredFieldsWithInheritance(this.getClass());
         for (Field field : fieldList) {
             for (Annotation annotation : field.getAnnotations()) {
@@ -370,7 +370,7 @@ public abstract class ApiEntry {
      * @return partUrl withParams
      * @throws ru.sbtqa.tag.apifactory.exception.ApiException
      */
-    private String getFullUrl(String url) throws ApiException {
+    protected String getFullUrl(String url) throws ApiException {
         List<Field> fieldList = FieldUtilsExt.getDeclaredFieldsWithInheritance(this.getClass());
         String urlParamString = "";
         for (Field field : fieldList) {
@@ -446,7 +446,7 @@ public abstract class ApiEntry {
     }
 
     @SuppressWarnings("ThrowableResultIgnored")
-    private void setDependentResponseParameters() throws ApiException {
+    protected void setDependentResponseParameters() throws ApiException {
         List<Field> fieldList = FieldUtilsExt.getDeclaredFieldsWithInheritance(this.getClass());
         for (Field field : fieldList) {
             field.setAccessible(true);
@@ -514,7 +514,7 @@ public abstract class ApiEntry {
         }
     }
 
-    private Map<String, Object> sortByKeyLength(Map<String, Object> map) {
+    protected Map<String, Object> sortByKeyLength(Map<String, Object> map) {
         Map<String, Object> treeMap = new TreeMap<>(
                 new Comparator<String>() {
             @Override
