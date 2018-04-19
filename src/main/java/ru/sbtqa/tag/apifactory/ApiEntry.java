@@ -39,11 +39,11 @@ public abstract class ApiEntry {
 
     protected static final Logger LOG = LoggerFactory.getLogger(ApiEntry.class);
 
-    protected String requestPath = this.getClass().getAnnotation(ApiAction.class).path();
-    protected final Map<String, String> headers = new HashMap<>();
-    protected final Map<String, Object> parameters = new HashMap<>();
-    protected String body = null;
-    protected String template = this.getClass().getAnnotation(ApiAction.class).template();
+    private String requestPath = this.getClass().getAnnotation(ApiAction.class).path();
+    private final Map<String, String> headers = new HashMap<>();
+    private final Map<String, Object> parameters = new HashMap<>();
+    private String body = null;
+    private String template = this.getClass().getAnnotation(ApiAction.class).template();
 
     /**
      * Set request parameter by title
@@ -543,12 +543,30 @@ public abstract class ApiEntry {
     }
 
     /**
+     * Add header to headers map
+     * @param key
+     * @param value
+     */
+    public void addHeader(String key, String value) {
+        headers.put(key, value);
+    }
+
+    /**
      * Get parameters
      *
      * @return the parameters
      */
     public Map<String, Object> getParameters() {
         return parameters;
+    }
+
+    /**
+     * Add parameter to parameters map
+     * @param key
+     * @param value
+     */
+    public void addParameter(String key, Object value) {
+        parameters.put(key, value);
     }
 
     /**
@@ -594,7 +612,14 @@ public abstract class ApiEntry {
      */
     public String getActionPath() {
         return requestPath;
+    }
 
+    /**
+     * Set action path
+     * @param path
+     */
+    public void setActionPath(String path) {
+        requestPath = path;
     }
 
     /**
