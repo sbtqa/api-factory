@@ -7,6 +7,7 @@ import javax.ws.rs.core.UriBuilder;
 import org.eclipse.jetty.server.Server;
 import org.glassfish.jersey.jetty.JettyHttpContainerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
+import ru.sbtqa.tag.apifactory.endpoints.ApiAction;
 
 public class JettySetupStepDefs {
 
@@ -16,12 +17,13 @@ public class JettySetupStepDefs {
     Server server;
 
     @Before(order = 1)
-    public void before() {
+    public void before() throws InterruptedException {
         URI uri = UriBuilder.fromUri(HOST).port(PORT).build();
         ResourceConfig config = new ResourceConfig();
-        config.register(Rest.class);
+        config.register(ApiAction.class);
 
         server = JettyHttpContainerFactory.createServer(uri, config);
+//        Thread.sleep(1000000);
     }
 
     @After
