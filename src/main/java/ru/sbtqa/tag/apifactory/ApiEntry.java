@@ -37,7 +37,7 @@ import ru.sbtqa.tag.qautils.reflect.FieldUtilsExt;
  */
 public abstract class ApiEntry {
 
-    private static final Logger LOG = LoggerFactory.getLogger(ApiEntry.class);
+    protected static final Logger LOG = LoggerFactory.getLogger(ApiEntry.class);
 
     private String requestPath = this.getClass().getAnnotation(ApiAction.class).path();
     private final Map<String, String> headers = new HashMap<>();
@@ -56,8 +56,8 @@ public abstract class ApiEntry {
         List<Field> fieldList = FieldUtilsExt.getDeclaredFieldsWithInheritance(this.getClass());
         for (Field field : fieldList) {
             for (Annotation annotation : field.getAnnotations()) {
-                if (annotation instanceof ApiRequestParam
-                        && ((ApiRequestParam) annotation).title().equals(title)
+                if (((annotation instanceof ApiRequestParam && ((ApiRequestParam) annotation).title().equals(title))
+                        || (annotation instanceof ApiUrlParam && ((ApiUrlParam) annotation).title().equals(title)))
                         && value != null && !value.isEmpty()) {
                     field.setAccessible(true);
                     try {
@@ -80,7 +80,7 @@ public abstract class ApiEntry {
      * @throws ru.sbtqa.tag.apifactory.exception.ApiException if parameter with
      * name doesn't exists or not available
      */
-    private void setParamValueByName(String name, Object value) throws ApiException {
+    protected void setParamValueByName(String name, Object value) throws ApiException {
         List<Field> fieldList = FieldUtilsExt.getDeclaredFieldsWithInheritance(this.getClass());
         for (Field field : fieldList) {
             if (name.equals(field.getName())) {
@@ -158,6 +158,8 @@ public abstract class ApiEntry {
         //Get request method of current api object
         HTTP requestMethod = this.getClass().getAnnotation(ApiAction.class).method();
         String templateName = this.getClass().getAnnotation(ApiAction.class).template();
+
+        url = getFullUrl(url);
 
         Bullet response = null;
         Bullet request = null;
@@ -346,7 +348,7 @@ public abstract class ApiEntry {
      * @throws ru.sbtqa.tag.apifactory.exception.ApiException if one of headers
      * is not available
      */
-    private void setHeaders() throws ApiException {
+    protected void setHeaders() throws ApiException {
         List<Field> fieldList = FieldUtilsExt.getDeclaredFieldsWithInheritance(this.getClass());
         for (Field field : fieldList) {
             for (Annotation annotation : field.getAnnotations()) {
@@ -360,6 +362,43 @@ public abstract class ApiEntry {
                 }
             }
         }
+    }
+
+    /**
+     * Get url with param if param field exist
+     *
+     * @return partUrl withParams
+     * @throws ru.sbtqa.tag.apifactory.exception.ApiException
+     */
+    protected String getFullUrl(String url) throws ApiException {
+        List<Field> fieldList = FieldUtilsExt.getDeclaredFieldsWithInheritance(this.getClass());
+        String urlParamString = "";
+        for (Field field : fieldList) {
+            ApiUrlParam urlParam = field.getAnnotation(ApiUrlParam.class);
+            if (urlParam != null && !"".equals(urlParam.title())) {
+                field.setAccessible(true);
+                try {
+                    String param = (String) field.get(this);
+                    if (param != null && !param.equals("")) {
+                        if (!"".equals(urlParamString)) {
+                            urlParamString += "&";
+                        }
+                        urlParamString += urlParam.title() + "=" + param;
+                    }
+                } catch (IllegalArgumentException | IllegalAccessException ex) {
+                    throw new ApiEntryInitializationException("Parameter with title '" + urlParam.title()+ "' is not available", ex);
+                }
+            }
+        }
+
+        if (!urlParamString.equals("")) {
+            if (url.contains("?")) {
+                url += "&" + urlParamString;
+            } else {
+                url += "?" + urlParamString;
+            }
+        }
+        return url;
     }
 
     /**
@@ -407,7 +446,7 @@ public abstract class ApiEntry {
     }
 
     @SuppressWarnings("ThrowableResultIgnored")
-    private void setDependentResponseParameters() throws ApiException {
+    protected void setDependentResponseParameters() throws ApiException {
         List<Field> fieldList = FieldUtilsExt.getDeclaredFieldsWithInheritance(this.getClass());
         for (Field field : fieldList) {
             field.setAccessible(true);
@@ -475,7 +514,7 @@ public abstract class ApiEntry {
         }
     }
 
-    private Map<String, Object> sortByKeyLength(Map<String, Object> map) {
+    protected Map<String, Object> sortByKeyLength(Map<String, Object> map) {
         Map<String, Object> treeMap = new TreeMap<>(
                 new Comparator<String>() {
             @Override
@@ -504,12 +543,30 @@ public abstract class ApiEntry {
     }
 
     /**
+     * Add header to headers map
+     * @param key
+     * @param value
+     */
+    public void addHeader(String key, String value) {
+        headers.put(key, value);
+    }
+
+    /**
      * Get parameters
      *
      * @return the parameters
      */
     public Map<String, Object> getParameters() {
         return parameters;
+    }
+
+    /**
+     * Add parameter to parameters map
+     * @param key
+     * @param value
+     */
+    public void addParameter(String key, Object value) {
+        parameters.put(key, value);
     }
 
     /**
@@ -555,7 +612,14 @@ public abstract class ApiEntry {
      */
     public String getActionPath() {
         return requestPath;
+    }
 
+    /**
+     * Set action path
+     * @param path
+     */
+    public void setActionPath(String path) {
+        requestPath = path;
     }
 
     /**
