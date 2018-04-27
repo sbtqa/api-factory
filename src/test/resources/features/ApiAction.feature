@@ -1,4 +1,4 @@
-# language: en
+#language:en
 @apiaction
 Feature: Api action test
 
