@@ -9,7 +9,7 @@ import ru.sbtqa.tag.apifactory.annotation.DependentResponseParam;
 import ru.sbtqa.tag.apifactory.rest.HTTP;
 import ru.sbtqa.tag.apifactory.utils.Default;
 
-@ApiAction(method = HTTP.GET, path = "client/get", title = "dependant second")
+@ApiAction(method = HTTP.GET, path = "client/get", title = "dependent second")
 public class PreviousSecondEntry extends ApiEntry {
 
 

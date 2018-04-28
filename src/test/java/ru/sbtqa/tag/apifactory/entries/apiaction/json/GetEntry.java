@@ -1,4 +1,4 @@
-package ru.sbtqa.tag.apifactory.entries.apiaction;
+package ru.sbtqa.tag.apifactory.entries.apiaction.json;
 
 import org.junit.Assert;
 import ru.sbtqa.tag.apifactory.ApiEntry;
@@ -10,7 +10,7 @@ import ru.sbtqa.tag.apifactory.utils.Default;
 import ru.sbtqa.tag.parsers.JsonParser;
 import ru.sbtqa.tag.parsers.core.exceptions.ParserException;
 
-@ApiAction(method = HTTP.GET, path = "client/get", title = "get test")
+@ApiAction(method = HTTP.GET, path = "client/get", title = "get with json")
 public class GetEntry extends ApiEntry {
 
     @ApiValidationRule(title = "default client")

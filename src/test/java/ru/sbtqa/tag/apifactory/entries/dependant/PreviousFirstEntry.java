@@ -4,7 +4,7 @@ import ru.sbtqa.tag.apifactory.ApiEntry;
 import ru.sbtqa.tag.apifactory.annotation.ApiAction;
 import ru.sbtqa.tag.apifactory.rest.HTTP;
 
-@ApiAction(method = HTTP.GET, path = "client/get", title = "dependant first")
+@ApiAction(method = HTTP.GET, path = "client/get", title = "dependent first")
 public class PreviousFirstEntry extends ApiEntry {
 
 }

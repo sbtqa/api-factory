@@ -5,7 +5,7 @@ import javax.ws.rs.core.UriBuilder;
 import org.eclipse.jetty.server.Server;
 import org.glassfish.jersey.jetty.JettyHttpContainerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
-import ru.sbtqa.tag.apifactory.endpoints.ClientEndpoint;
+import ru.sbtqa.tag.apifactory.endpoints.ClientJsonEndpoint;
 
 public class JettyServiceUtils {
 
@@ -15,7 +15,7 @@ public class JettyServiceUtils {
     public static Server startJetty() {
         URI uri = UriBuilder.fromUri(HOST).port(PORT).build();
         ResourceConfig config = new ResourceConfig();
-        config.register(ClientEndpoint.class);
+        config.register(ClientJsonEndpoint.class);
 
         return JettyHttpContainerFactory.createServer(uri, config);
     }

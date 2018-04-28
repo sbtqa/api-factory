@@ -27,7 +27,7 @@ public class RestFormImpl implements Rest {
 
     @Override
     public Bullet get(String url, Map<String, String> headers) throws ApiRestException {
-        return fire("GET", url, headers, null);
+        return fire("GET", url, headers, new HashMap<String, String>());
     }
 
     @Override

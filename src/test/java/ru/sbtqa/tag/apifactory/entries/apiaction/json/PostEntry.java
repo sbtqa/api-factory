@@ -1,4 +1,4 @@
-package ru.sbtqa.tag.apifactory.entries.apiaction;
+package ru.sbtqa.tag.apifactory.entries.apiaction.json;
 
 import org.junit.Assert;
 import ru.sbtqa.tag.apifactory.ApiEntry;
@@ -12,8 +12,8 @@ import ru.sbtqa.tag.apifactory.utils.Default;
 import ru.sbtqa.tag.parsers.JsonParser;
 import ru.sbtqa.tag.parsers.core.exceptions.ParserException;
 
-@ApiAction(method = HTTP.POST, path = "client/post-with-template", title = "template test", template = "templates/Client.json")
-public class ApiActionTemplate extends ApiEntry {
+@ApiAction(method = HTTP.POST, path = "client/post", title = "post with json", template = "templates/Client.json")
+public class PostEntry extends ApiEntry {
 
     @ApiRequestHeader(header = "Content-Type")
     private String header = "application/json";
