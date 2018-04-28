@@ -1,7 +1,7 @@
 #language:en
 @putinstash
-Feature: Api action test
+Feature: Put in stash test
 
-  Scenario:
+  Scenario: Put in stash test
     * user sends request for (put in stash)
     * system returns "stash"

@@ -1,7 +1,7 @@
 #language:en
 @dependant
-Feature: Api action test
+Feature: Dependant response param test
 
-  Scenario:
+  Scenario: Dependant response param test
     * user sends request for (dependant first)
     * user sends request for (dependant second)

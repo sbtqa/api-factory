@@ -28,17 +28,6 @@ public class ClientEndpoint {
                 .build();
     }
 
-    @POST
-    @Path("post-with-template")
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response postWithParams(Client client) {
-        SimpleResult result = new SimpleResult();
-        result.setResult(client.getId() + client.getName() + client.getEmail());
-        return Response.ok(result)
-                .build();
-    }
-
     @GET
     @Path("get-with-params")
     @Produces(MediaType.APPLICATION_JSON)
@@ -49,6 +38,17 @@ public class ClientEndpoint {
         SimpleResult result = new SimpleResult();
         result.setResult(header + param);
 
+        return Response.ok(result)
+                .build();
+    }
+
+    @POST
+    @Path("post-with-template")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response postWithParams(Client client) {
+        SimpleResult result = new SimpleResult();
+        result.setResult(client.getId() + client.getName() + client.getEmail());
         return Response.ok(result)
                 .build();
     }
