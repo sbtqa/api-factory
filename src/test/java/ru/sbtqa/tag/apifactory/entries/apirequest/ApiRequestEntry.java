@@ -31,6 +31,4 @@ public class ApiRequestEntry extends ApiEntry {
 
         Assert.assertEquals(expectedResult, actualResult);
     }
-
-
 }

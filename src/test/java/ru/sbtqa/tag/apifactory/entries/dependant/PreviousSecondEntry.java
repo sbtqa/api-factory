@@ -12,7 +12,6 @@ import ru.sbtqa.tag.apifactory.utils.Default;
 @ApiAction(method = HTTP.GET, path = "client/get", title = "dependent second")
 public class PreviousSecondEntry extends ApiEntry {
 
-
     @DependentResponseParam(path = "$.email")
     private String emailFromPreviousRequest;
 

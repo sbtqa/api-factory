@@ -1,6 +1,5 @@
 package ru.sbtqa.tag.apifactory;
 
-import cucumber.deps.difflib.myers.PathNode;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
