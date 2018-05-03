@@ -465,7 +465,7 @@ public abstract class ApiEntry {
                 if (!"".equals(dependantParamAnnotation.header())) {
                     Map<String, String> dependantResponseHeaders = ApiFactory.getApiFactory().getResponseRepository().getHeaders(responseEntry);
                     for (Map.Entry<String, String> header : dependantResponseHeaders.entrySet()) {
-                        if (header.getKey().equals(dependantParamAnnotation.header())) {
+                        if (null != header.getKey() && header.getKey().equals(dependantParamAnnotation.header())) {
                             fieldValue = header.getValue();
                         }
                     }
@@ -480,7 +480,7 @@ public abstract class ApiEntry {
                             callbackResult = ApiFactory.getApiFactory().getParser().getConstructor().newInstance().call(item);
                         } catch (InstantiationException | IllegalAccessException | NoSuchMethodException | SecurityException | InvocationTargetException ex) {
                             throw new ApiEntryInitializationException("Could not initialize parser callback", ex);
-                        } catch (NoSuchElementException e) {
+                        } catch (Exception e) {
                             LOG.debug("No such element in callback", e);
                             if (field.getAnnotation(DependentResponseParam.class).necessity()) {
                                 throw new NoSuchElementException(e.getMessage());
