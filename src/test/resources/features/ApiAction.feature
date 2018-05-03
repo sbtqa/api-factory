@@ -5,7 +5,7 @@ Feature: Api action test
   @get
   Scenario Outline: get
     * user activate <implementation> rest
-    * user sends request for (<entry>)
+    * user sends request for "<entry>"
     * system returns "default client"
     Examples:
       | implementation | entry         |
@@ -15,7 +15,7 @@ Feature: Api action test
   @post
   Scenario Outline: post
     * user activate <implementation> rest
-    * user sends request for (<entry>)
+    * user sends request for "<entry>"
     * system returns "result"
     Examples:
       | implementation | entry         |
@@ -25,7 +25,7 @@ Feature: Api action test
   @put
   Scenario Outline: put
     * user activate <implementation> rest
-    * user sends request for (put test)
+    * user sends request for "put test"
     * system returns "result"
     Examples:
       | implementation |
@@ -34,7 +34,7 @@ Feature: Api action test
   @patch @disabled
   Scenario Outline: patch
     * user activate <implementation> rest
-    * user sends request for (patch test)
+    * user sends request for "patch test"
     * system returns "result"
     Examples:
       | implementation |
@@ -44,7 +44,7 @@ Feature: Api action test
   @delete
   Scenario Outline: delete
     * user activate <implementation> rest
-    * user sends request for (delete test)
+    * user sends request for "delete test"
     * system returns "result"
     Examples:
       | implementation |
