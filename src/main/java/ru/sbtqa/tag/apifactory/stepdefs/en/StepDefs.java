@@ -12,7 +12,7 @@ public class StepDefs extends GenericStepDefs {
      * {@inheritDoc}
      */
     @Override
-    @And("^user sends request (?:for|to|about) \\((.*?)\\)$")
+    @And("^user sends request (?:for|to|about) \\(([^)]*)\\)$")
     public void userSendRequestNoParams(String action) throws ApiException {
         super.userSendRequestNoParams(action);
     }
@@ -21,7 +21,7 @@ public class StepDefs extends GenericStepDefs {
      * {@inheritDoc}
      */
     @Override
-    @And("^user sends request (?:for|to|about) \\((.*?)\\) with parameters:?$")
+    @And("^user sends request (?:for|to|about) \\(([^)]*)\\) with parameters:?$")
     public void userSendRequestTableParam(String action, DataTable dataTable) throws ApiException {
         super.userSendRequestTableParam(action, dataTable);
     }
