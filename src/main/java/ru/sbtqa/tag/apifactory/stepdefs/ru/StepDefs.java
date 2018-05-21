@@ -12,7 +12,7 @@ public class StepDefs extends GenericStepDefs {
      * {@inheritDoc}
      */
     @Override
-    @И("^(?:пользователь |он )?отправляет запрос \\(([^)]*)\\)$")
+    @И("^(?:пользователь |он )?отправляет запрос \"([^\"]*)\"$")
     public void userSendRequestNoParams(String action) throws ApiException {
         super.userSendRequestNoParams(action);
     }
@@ -21,7 +21,7 @@ public class StepDefs extends GenericStepDefs {
      * {@inheritDoc}
      */
     @Override
-    @И("^(?:пользователь |он )?отправляет запрос \\(([^)]*)\\) с параметрами:?$")
+    @И("^(?:пользователь |он )?отправляет запрос \"([^\"]*)\" с параметрами:?$")
     public void userSendRequestTableParam(String action, DataTable dataTable) throws ApiException {
         super.userSendRequestTableParam(action, dataTable);
     }
