@@ -1,12 +1,18 @@
-package ru.sbtqa.tag.apifactory.stepdefs.ru;
+package ru.sbtqa.tag.pagefactory.stepdefs.ru;
 
 import cucumber.api.DataTable;
+import cucumber.api.java.Before;
 import cucumber.api.java.bg.И;
 import ru.sbtqa.tag.apifactory.exception.ApiException;
-import ru.sbtqa.tag.apifactory.stepdefs.GenericStepDefs;
+import ru.sbtqa.tag.pagefactory.stepdefs.ApiGenericStepDefs;
 
 
-public class StepDefs extends GenericStepDefs {
+public class ApiStepDefs extends ApiGenericStepDefs {
+
+    @Before
+    public void iniApi() {
+        super.initApi();
+    }
 
     /**
      * {@inheritDoc}

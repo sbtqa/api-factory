@@ -1,7 +1,6 @@
-package ru.sbtqa.tag.apifactory.stepdefs;
+package ru.sbtqa.tag.pagefactory.stepdefs;
 
 import cucumber.api.DataTable;
-import cucumber.api.java.en.And;
 import java.util.Map;
 import ru.sbtqa.tag.apifactory.ApiFactory;
 import ru.sbtqa.tag.apifactory.exception.ApiException;
@@ -24,7 +23,7 @@ import ru.sbtqa.tag.apifactory.exception.ApiException;
  * @see <a href="https://cucumber.io/docs/reference#step-definitions">Cucumber
  * documentation</a>
  */
-public class GenericStepDefs {
+public class ApiGenericStepDefs extends ApiSetupSteps{
 
     /**
      * Execute api entry action (request) with no parameters
