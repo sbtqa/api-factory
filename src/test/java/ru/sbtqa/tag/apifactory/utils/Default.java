@@ -2,7 +2,7 @@ package ru.sbtqa.tag.apifactory.utils;
 
 
 public interface Default {
-    
+
     int ID = 11223344;
     String NAME = "Default_person";
     String EMAIL = "default_person@google.com";
