@@ -1,18 +1,24 @@
-package ru.sbtqa.tag.apifactory.stepdefs.ru;
+package ru.sbtqa.tag.stepdefs.en;
 
 import cucumber.api.DataTable;
-import cucumber.api.java.bg.И;
+import cucumber.api.java.Before;
+import cucumber.api.java.en.And;
 import ru.sbtqa.tag.apifactory.exception.ApiException;
-import ru.sbtqa.tag.apifactory.stepdefs.GenericStepDefs;
+import ru.sbtqa.tag.stepdefs.ApiGenericStepDefs;
 
 
-public class StepDefs extends GenericStepDefs {
+public class ApiStepDefs extends ApiGenericStepDefs {
+
+    @Before
+    public void iniApi() {
+        super.initApi();
+    }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    @И("^(?:пользователь |он )?отправляет запрос \"([^\"]*)\"$")
+    @And("^user sends request (?:for|to|about) \"([^\"]*)\"$")
     public void userSendRequestNoParams(String action) throws ApiException {
         super.userSendRequestNoParams(action);
     }
@@ -21,7 +27,7 @@ public class StepDefs extends GenericStepDefs {
      * {@inheritDoc}
      */
     @Override
-    @И("^(?:пользователь |он )?отправляет запрос \"([^\"]*)\" с параметрами:?$")
+    @And("^user sends request (?:for|to|about) \"([^\"]*)\" with parameters:?$")
     public void userSendRequestTableParam(String action, DataTable dataTable) throws ApiException {
         super.userSendRequestTableParam(action, dataTable);
     }
@@ -30,7 +36,7 @@ public class StepDefs extends GenericStepDefs {
      * {@inheritDoc}
      */
     @Override
-    @И("^система возвращает ответ \"([^\"]*)\"$")
+    @And("^system returns \"([^\"]*)\"$")
     public void userValidate(String rule) throws ApiException {
         super.userValidate(rule);
     }
@@ -39,7 +45,7 @@ public class StepDefs extends GenericStepDefs {
      * {@inheritDoc}
      */
     @Override
-    @И("^система возвращает ответ \"([^\"]*)\" с параметрами:?$")
+    @And("^system returns \"([^\"]*)\" with parameters:?$")
     public void userValidateTable(String rule, DataTable dataTable) throws ApiException {
         super.userValidateTable(rule, dataTable);
     }

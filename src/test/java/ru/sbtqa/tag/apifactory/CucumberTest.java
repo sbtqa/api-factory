@@ -11,7 +11,7 @@ import ru.sbtqa.tag.parsers.JsonParser;
 
 @RunWith(TagCucumber.class)
 @CucumberOptions(monochrome = true, format = {"pretty"},
-        glue = {"ru.sbtqa.tag.apifactory.stepdefs", "setting"},
+        glue = {"ru.sbtqa.tag.stepdefs", "ru.sbtqa.tag.apifactory.stepdefs", "setting"},
         features = {"src/test/resources/features"}
         ,tags = {"~@disabled"}
 )
