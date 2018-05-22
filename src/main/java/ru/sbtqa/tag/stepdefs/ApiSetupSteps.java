@@ -1,17 +1,22 @@
-package ru.sbtqa.tag.apifactory.stepdefs;
+package ru.sbtqa.tag.stepdefs;
 
-import cucumber.api.java.Before;
 import java.io.File;
 import org.apache.log4j.PropertyConfigurator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class SetupStepDefs {
+public class ApiSetupSteps {
 
-    private static final Logger LOG = LoggerFactory.getLogger(SetupStepDefs.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ApiSetupSteps.class);
 
-    @Before()
-    public void setUp() {
+    private static final ThreadLocal<Boolean> isApiInited = ThreadLocal.withInitial(() -> false);
+
+    public synchronized void initApi() {
+        if (isApiInited.get()) {
+            return;
+        } else {
+            isApiInited.set(true);
+        }
         //try to connect logger property file if exists
         String path = "src/test/resources/config/log4j.properties";
         if (new File(path).exists()) {
