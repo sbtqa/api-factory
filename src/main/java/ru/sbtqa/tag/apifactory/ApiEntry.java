@@ -542,7 +542,6 @@ public abstract class ApiEntry {
 				} else {
 					Object dependantResponseBody = ApiFactory.getApiFactory().getResponseRepository()
 							.getBody(responseEntry);
-
 					// Use applied parser to get value by path throw the
 					// callback
 					if (ApiFactory.getApiFactory().getParser() != null) {
@@ -555,7 +554,7 @@ public abstract class ApiEntry {
 						} catch (InstantiationException | IllegalAccessException | NoSuchMethodException
 								| SecurityException | InvocationTargetException ex) {
 							throw new ApiEntryInitializationException("Could not initialize parser callback", ex);
-						} catch (NoSuchElementException e) {
+						} catch (NoSuchElementException|com.jayway.jsonpath.PathNotFoundException e) {
 							LOG.debug("No such element in callback", e);
 							if (field.getAnnotation(DependentResponseParam.class).necessity()) {
 								throw new NoSuchElementException(e.getMessage());
