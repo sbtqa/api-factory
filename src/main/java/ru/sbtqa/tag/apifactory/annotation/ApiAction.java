@@ -14,7 +14,7 @@ import ru.sbtqa.tag.apifactory.rest.HTTP;
  * 
  *
  */
-//Повторяющаяся аннатация
+//Повторяющаяся аннотация
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 @Repeatable(ApiActions.class)

@@ -5,6 +5,9 @@ import static java.util.Arrays.asList;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import cucumber.runtime.ClassFinder;
 import cucumber.runtime.Runtime;
 import cucumber.runtime.RuntimeOptions;
@@ -12,6 +15,7 @@ import cucumber.runtime.RuntimeOptions;
 public class CucumberStaticRunner {
 
 	private static String status = "\nFinished: SUCCESS";
+	private static final Logger LOG = LoggerFactory.getLogger(CucumberStaticRunner.class);
 
 	public static void startTests(String[] argv) throws Throwable {
 		byte exitstatus = run(argv, Thread.currentThread().getContextClassLoader());
@@ -28,7 +32,7 @@ public class CucumberStaticRunner {
 		if (runtime.getErrors().size() > 0 || runtime.getSnippets().size() > 0) {
 			status = "Finished: FAILURE";
 		}
-		System.out.println(status);
+		LOG.warn(status);
 		return runtime.exitStatus();
 	}
 }

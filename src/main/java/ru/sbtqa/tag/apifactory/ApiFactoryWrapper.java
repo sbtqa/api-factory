@@ -78,7 +78,6 @@ public class ApiFactoryWrapper {
         }
         if (null == currentEntry) {
             currentEntry = getApiEntry(entriesPackage, title);
-
         }       
         if (null == currentEntry) {
             throw new ApiException("Api entry with title '" + title + "' is not registered");
