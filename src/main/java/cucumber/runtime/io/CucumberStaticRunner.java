@@ -11,7 +11,6 @@ import cucumber.runtime.RuntimeOptions;
 
 public class CucumberStaticRunner {
 
-	// private String status = "Finished: FAILURE";
 	private static String status = "\nFinished: SUCCESS";
 
 	public static void startTests(String[] argv) throws Throwable {
