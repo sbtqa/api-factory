@@ -1,6 +1,7 @@
 package ru.sbtqa.tag.apifactory.annotation;
 
 import java.lang.annotation.ElementType;
+import java.lang.annotation.Repeatable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
@@ -10,11 +11,13 @@ import ru.sbtqa.tag.apifactory.rest.HTTP;
 
 /**
  * This annotation used above ApiEntry class declaration
- *
+ * 
  *
  */
+//Повторяющаяся аннатация
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
+@Repeatable(ApiActions.class)
 public @interface ApiAction {
 
     /**
