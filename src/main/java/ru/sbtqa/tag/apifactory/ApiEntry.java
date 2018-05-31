@@ -42,7 +42,6 @@ import ru.sbtqa.tag.datajack.Stash;
 import ru.sbtqa.tag.parsers.core.ParserItem;
 import ru.sbtqa.tag.qautils.properties.Props;
 import ru.sbtqa.tag.qautils.reflect.FieldUtilsExt;
-import com.jayway.jsonpath.PathNotFoundException;
 /**
  * Api object (ala Page object). Request to definite url with a set of
  * parameters such as request method, parameters, response validation.
@@ -554,7 +553,7 @@ public abstract class ApiEntry {
 						} catch (InstantiationException | IllegalAccessException | NoSuchMethodException
 								| SecurityException | InvocationTargetException ex) {
 							throw new ApiEntryInitializationException("Could not initialize parser callback", ex);
-						} catch (NoSuchElementException|PathNotFoundException e) {
+						} catch (Exception e) {
 							LOG.debug("No such element in callback", e);
 							if (field.getAnnotation(DependentResponseParam.class).necessity()) {
 								throw new NoSuchElementException(e.getMessage());
