@@ -32,7 +32,7 @@ public class CucumberStaticRunner {
 		if (runtime.getErrors().size() > 0 || runtime.getSnippets().size() > 0) {
 			status = "Finished: FAILURE";
 		}
-		LOG.warn(status);
+		LOG.info(status);
 		return runtime.exitStatus();
 	}
 }
