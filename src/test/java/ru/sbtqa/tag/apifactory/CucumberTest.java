@@ -1,19 +1,20 @@
 package ru.sbtqa.tag.apifactory;
 
 import cucumber.api.CucumberOptions;
+import cucumber.api.junit.Cucumber;
 import org.eclipse.jetty.server.Server;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.runner.RunWith;
 import ru.sbtqa.tag.apifactory.utils.JettyServiceUtils;
-import ru.sbtqa.tag.cucumber.TagCucumber;
 import ru.sbtqa.tag.parsers.JsonParser;
 
-@RunWith(TagCucumber.class)
-@CucumberOptions(monochrome = true, format = {"pretty"},
-        glue = {"ru.sbtqa.tag.stepdefs", "ru.sbtqa.tag.apifactory.stepdefs", "setting"},
-        features = {"src/test/resources/features"}
-        ,tags = {"~@disabled"}
+@RunWith(Cucumber.class)
+@CucumberOptions(
+        glue = {"ru.sbtqa.tag.stepdefs.en", "ru.sbtqa.tag.apifactory.stepdefs"},
+        features = {"src/test/resources/features"},
+        tags = "~@disabled"
+
 )
 public class CucumberTest {
 

@@ -36,6 +36,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>1.8</maven.compiler.source>
     <maven.compiler.target>1.8</maven.compiler.target>
+    <version.cucumber>2.4.0</version.cucumber>
   </properties>
   <distributionManagement>
     <snapshotRepository>
@@ -71,13 +72,7 @@
       <artifactId>core</artifactId>
       <version>1.0.4</version>
       <type>jar</type>
-    </dependency>
-    <dependency>
-      <groupId>ru.sbtqa.tag</groupId>
-      <artifactId>cucumber-runner</artifactId>
-      <version>1.0.10</version>
-      <type>jar</type>
-    </dependency>
+    </dependency>  
     <dependency>
       <groupId>commons-io</groupId>
       <artifactId>commons-io</artifactId>
@@ -149,6 +144,16 @@
       <artifactId>jersey-common</artifactId>
       <version>2.27</version>
       <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>io.cucumber</groupId>
+      <artifactId>cucumber-java</artifactId>
+      <version>${version.cucumber}</version>
+    </dependency>
+    <dependency>
+      <groupId>io.cucumber</groupId>
+      <artifactId>cucumber-junit</artifactId>
+      <version>${version.cucumber}</version>
     </dependency>
   </dependencies>
   <build>
