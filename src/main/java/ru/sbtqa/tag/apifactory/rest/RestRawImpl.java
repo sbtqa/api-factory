@@ -13,6 +13,9 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import clover.com.google.gson.JsonObject;
+import gherkin.deps.com.google.gson.Gson;
 import ru.sbtqa.tag.apifactory.exception.ApiRestException;
 import ru.sbtqa.tag.apifactory.repositories.Bullet;
 import ru.sbtqa.tag.qautils.properties.Props;
@@ -80,6 +83,9 @@ public class RestRawImpl implements Rest {
             //add body
             if (null != body && !"".equals(body)) {
                 try (OutputStreamWriter out = new OutputStreamWriter(connection.getOutputStream(), encoding)) {
+                    if (body instanceof Map) {
+                        body = new Gson().toJson(body);
+                    }
                     out.write((String) body);
                 }
             }

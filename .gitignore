@@ -2,3 +2,6 @@ target/
 /.project
 .idea/
 api-factory.iml
+.classpath
+/.settings/
+/.vscode/
