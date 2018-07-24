@@ -13,7 +13,8 @@ import ru.sbtqa.tag.parsers.JsonParser;
 @CucumberOptions(
         glue = {"ru.sbtqa.tag.stepdefs.en", "ru.sbtqa.tag.apifactory.stepdefs"},
         features = {"src/test/resources/features"},
-        tags = "~@disabled"
+        plugin = {"pretty"},
+        tags = "not @disabled"
 
 )
 public class CucumberTest {

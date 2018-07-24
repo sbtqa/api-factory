@@ -78,7 +78,7 @@ public class RestRawImpl implements Rest {
             }
 
             //add body
-            if (null != body && !"".equals(body)) {
+            if (null != body && !"".equals(body) && body instanceof String) {
                 try (OutputStreamWriter out = new OutputStreamWriter(connection.getOutputStream(), encoding)) {
                     out.write((String) body);
                 }
