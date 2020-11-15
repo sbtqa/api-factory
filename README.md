@@ -1,4 +1,4 @@
-# Api-Factory
+# Api-Factory (Deprecared. Use page-factory-2 instead)
 [![Build Status](https://travis-ci.org/sbtqa/api-factory.svg?branch=master)](https://travis-ci.org/sbtqa/api-factory) [![GitHub release](https://img.shields.io/github/release/sbtqa/api-factory.svg?style=flat-square)](https://github.com/sbtqa/api-factory/releases) [![Maven Central](https://img.shields.io/maven-central/v/ru.sbtqa.tag/api-factory.svg)](https://mvnrepository.com/artifact/ru.sbtqa.tag/api-factory) [![Gitter](https://img.shields.io/gitter/room/nwjs/nw.js.svg)](https://gitter.im/sbtqa-tag/Lobby)
 
 Api-Factory - opensource java framework для автоматизации функционального тестирования средствами API.
