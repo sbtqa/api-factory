@@ -4,11 +4,22 @@ import com.google.common.reflect.ClassPath;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
+import org.springframework.core.io.support.ResourcePatternResolver;
+import org.springframework.core.type.classreading.CachingMetadataReaderFactory;
+import org.springframework.core.type.classreading.MetadataReader;
+import org.springframework.core.type.classreading.MetadataReaderFactory;
+import org.springframework.util.ClassUtils;
+
+import ru.sbtqa.tag.apifactory.annotation.ApiActions;
 import ru.sbtqa.tag.apifactory.annotation.ApiAction;
 import ru.sbtqa.tag.apifactory.exception.ApiEntryInitializationException;
 import ru.sbtqa.tag.apifactory.exception.ApiException;
@@ -52,6 +63,7 @@ public class ApiFactoryWrapper {
         this.responseRepository = new Repository(RepositoryType.RESPONSE);
         this.requestRepository = new Repository(RepositoryType.REQUEST);
     }
+    
 
     /**
      * Get api entry object by title
@@ -66,14 +78,13 @@ public class ApiFactoryWrapper {
         }
         if (null == currentEntry) {
             currentEntry = getApiEntry(entriesPackage, title);
-
-        }
+        }       
         if (null == currentEntry) {
             throw new ApiException("Api entry with title '" + title + "' is not registered");
         }
         return currentEntry;
     }
-
+    
     /**
      * Get api entry by title and packageName
      *
@@ -94,27 +105,102 @@ public class ApiFactoryWrapper {
         } catch (IOException ex) {
             LOG.warn("Failed to shape class info set", ex);
         }
-
-        for (Class<?> entry : allClasses) {
-            if (null != entry.getAnnotation(ApiAction.class)) {
+        ApiEntry entry = getApiEntry(allClasses, title);
+        if(entry!=null){
+        	return entry;
+        }
+        return getApiEntry(getClasses(packageName, loader), title);
+    }
+    private ApiEntry getApiEntry(Set<Class<?>> allClasses, String title) throws ApiException{
+    	for (Class<?> entry : allClasses) {
+    		if (null != entry.getAnnotation(ApiAction.class)) {
                 String entryTitle = entry.getAnnotation(ApiAction.class).title();
                 String entryPath = entry.getAnnotation(ApiAction.class).path();
+          
                 if (entryTitle != null && entryTitle.equals(title)) {
-                    try {
-                        Constructor<ApiEntry> c = (Constructor<ApiEntry>) entry.getConstructor();
-                        currentEntry = c.newInstance();
-                        currentEntryTitle = title;
-                        currentEntryPath = entryPath;
-                        return currentEntry;
-                    } catch (NoSuchMethodException | SecurityException | InstantiationException
-                            | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
-                        throw new ApiEntryInitializationException("Can't initialize current entry parameters", ex);
-                    }
+                	 return getApiEntry(entryTitle, entryPath, title, entry);
                 }
             }
-        }
+    		else if(null != entry.getAnnotation(ApiActions.class)){
+    			for(ApiAction apiAction : entry.getAnnotation(ApiActions.class).value()){
+    				String entryTitle = apiAction.title();
+                    String entryPath = apiAction.path();
+                    if(entryTitle != null && entryTitle.equals(title)){
+                    	return getApiEntry(entryTitle, entryPath, title, entry);
+    				}
+    			}
+    		}
+        }	
         return null;
     }
+    
+    private ApiEntry getApiEntry(String entryTitle, String entryPath, String title, Class<?> entry) throws ApiEntryInitializationException {
+    	if (entryTitle != null && entryTitle.equals(title)) {
+            try {
+                Constructor<ApiEntry> c = (Constructor<ApiEntry>) entry.getConstructor();
+                currentEntry = c.newInstance();
+                Method method = getClass().getClassLoader().loadClass("ru.sbtqa.tag.apifactory.ApiEntry").getDeclaredMethod("toApiEntry", String.class);
+                method.invoke(currentEntry, title); 
+                currentEntryTitle = title;
+                currentEntryPath = entryPath;
+                return currentEntry;
+            } catch (NoSuchMethodException | SecurityException | InstantiationException| ClassNotFoundException
+                    | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
+                throw new ApiEntryInitializationException("Can't initialize current entry parameters", ex);
+            }
+        }
+    	return null;
+    }
+      
+    protected Set<Class<?>> getClasses(String packageName, ClassLoader loader) {
+        MetadataReaderFactory metadataReaderFactory = new CachingMetadataReaderFactory(
+                      loader);   
+        Set<Class<?>> allClasses = new HashSet<>();
+        try {
+               Resource[] resources = scan(loader, packageName);
+               for (Resource resource : resources) {
+                      Class<?> clazz = loadClass(loader, metadataReaderFactory, resource);  
+                      allClasses.add(clazz);
+               }
+               return allClasses;
+        }
+        catch (IOException ex) {
+               throw new IllegalStateException(ex);
+        }
+  }
+
+  private Resource[] scan(ClassLoader loader, String packageName) throws IOException {
+        ResourcePatternResolver resolver = new PathMatchingResourcePatternResolver(
+                      loader);
+        String pattern = ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX
+                      + ClassUtils.convertClassNameToResourcePath(packageName) + "/**/*.class";
+        Resource[] resources = resolver.getResources(pattern);
+        return resources;
+  }
+
+  private Class<?> loadClass(ClassLoader loader, MetadataReaderFactory readerFactory,
+               Resource resource) {
+        try {
+               MetadataReader reader = readerFactory.getMetadataReader(resource);
+               return ClassUtils.forName(reader.getClassMetadata().getClassName(), loader);
+        }
+        catch (ClassNotFoundException ex) {
+               handleFailure(resource, ex);
+               return null;
+        }
+        catch (LinkageError ex) {
+               handleFailure(resource, ex);
+               return null;
+        }
+        catch (Throwable ex) {        
+               LOG.warn("Unexpected failure when loading class resource " + resource, ex);
+               return null;
+        }
+  }
+
+  private void handleFailure(Resource resource, Throwable ex) {
+        	LOG.warn("Ignoring candidate class resource " + resource + " due to " + ex);  
+  }
 
     /**
      * Returns currently initialized api entry

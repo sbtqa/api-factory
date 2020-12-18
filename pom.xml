@@ -49,6 +49,12 @@
     </repository>
   </distributionManagement>
   <dependencies>
+  	<dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-core</artifactId>
+      <version>4.3.14.RELEASE</version>
+      <type>jar</type>
+    </dependency>
     <dependency>
       <groupId>ru.sbtqa.tag</groupId>
       <artifactId>datajack</artifactId>
